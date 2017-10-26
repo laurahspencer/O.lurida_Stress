@@ -70,7 +70,10 @@ _**Table 3:** Number of each population sampled post-pH treatment; see [20170408
 On [April 11th Olys were moved](https://laurahspencer.github.io/LabNotebook/Conditioning-Olys/) into a 50L flow-through tank equipped with a recirculating heater to condition them for the spring spawn. Temperature was raised ~1degC/day to ~18degC, the target temperature for broodstock conditioning.   
 
 ### Larval Collection
+yada yada yada
 
 ### Larval Rearing 
+yada yada yada
 
 ### Juvenile Care 
+yada yada yada
