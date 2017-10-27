@@ -1,6 +1,6 @@
 # Climate adaptation in _Ostrea lurida_ via transgenerational inheritance
 
-#### This repo houses data for the 2016-onwards _Ostrea lurida_ experiment on gonad maturation, larval production, and larval recruitment under varying temperature and pH overwintering treatments.  This project is being conducted at the Kenneth K. Chew Center for Shellfish Research & Restoration, at the NOAA Manchester Laboratory.  The following is a narrative of the project with links to pertinent notebook entries and data. 
+#### This repo houses data for the 2016-onwards _Ostrea lurida_ experiment on gonad maturation, larval production, and larval recruitment under varying temperature and pH overwintering treatments.  This project is being conducted at the Kenneth K. Chew Center for Shellfish Research & Restoration, at the NOAA Manchester Laboratory.  The following is a narrative of the project with links to pertinent notebook entries. 
 
 In December 2016 four groups of _Ostrea lurida_ were moved from pearl nets hanging off the NOAA dock in Clam Bay, Manchester WA into the the Ken Chew Center's hatcery.  Populations include: 
   1. Three groups of first-generation hatchery-produce (F1) oysters, all hatched at the Port Gamble hatchery in 2013 by Puget Sound Restoration Fund staff and Jake Heare, UW SAFS graduate student. The broodstock used to produce these F1 oysters were wild, harvested from Fidalgo Bay in North Puget Sound (NF, for "North-Fidalgo"), Dabob Bay in Hood Canal (HC, for "Hood Canal"), and Oyster Bay in South Puget Sound (SS, for "South South"). 
