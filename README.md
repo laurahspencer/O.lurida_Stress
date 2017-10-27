@@ -108,7 +108,8 @@ Eureka! I began observing larvae on [May 11th](https://laurahspencer.github.io/L
 
 ---
 ### Larval Stocking 
-[May 21st](https://laurahspencer.github.io/LabNotebook/Manchester5-21/) was the first official larval stocking date. Larvae were grown in 5-gallon buckets with 18degC flow-through seawater filtered to 5um with live algae cocktail dosed continuously via peristaltic pump to achieve ~100,000 cells/mL. Each bucket was equipped with an air stone and inflowing water at 8L/hr, which was heated to ~18degC in a large header tank.  New larvae were added to their respective treatment groups' larval rearing bucket. , and buckets were stocked to a maximum density of approximately 200,000 larvae as per bucket as per the following calculations, which were informed by the PSRF & the [FAO manual](http://www.fao.org/docrep/007/y5720e/y5720e06.htm), which advises ** 1 larva/mL for 1 tank turnover/day**
+[May 21st](https://laurahspencer.github.io/LabNotebook/Manchester5-21/) was the first official larval stocking date. Larvae were grown in 5-gallon buckets with 18degC flow-through seawater filtered to 5um, and dosed with live algae cocktail via peristaltic pump to achieve ~100,000 cells/mL. Each bucket was equipped with an air stone and inflowing water at 8L/hr. FSW was heated to ~18degC in a large header tank and distributed to all buckets.  New larvae were added to their respective treatment groups' larval rearing bucket. Buckets were stocked to a maximum density of ~200,000 larvae as per the following calculations (informed by the PSRF & the [FAO manual](http://www.fao.org/docrep/007/y5720e/y5720e06.htm)):
+  * Rule: ** 1 larva/mL for 1 tank turnover/day**
   * Larvae stocking equation: (24 hrs / (Tank Vol (L) / (flow rate)))1 larvae/mLTank Vol (L) * 1000mL/L = # larvae/mL to stock in bucket  
   * Calculation: (24hrs/(15L/8 L/hr))*1 larva/mL * 15 L * 1000 mL/L = 192,000 larvae. I’m going to round up to 200,000 larvae
 
