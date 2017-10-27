@@ -14,7 +14,7 @@ _**Figure**: Sites where Oly populations' progenitors were collected (F, D, O) a
 
 ---
 ### Temperature Treatment
-Each of the 4 Oly populations were divided into 2 treatments and "overwintered" From December 6th to February 4th in two temperatures: 6degC, 10degC which represents historic and projected winter temperatures, respectively. While each population was divided into two bags per treatment (4 bags total per population), two overwinterint tanks were used, one per temperature.  
+Each of the 4 Oly populations were divided into 2 treatments and "overwintered" From December 6th to February 4th in two temperatures: 6degC, 10degC which represents historic and projected winter temperatures, respectively. While each population was divided into two bags per treatment (4 bags total per population), two overwintering tanks were used, one per temperature.  
 
 _**Table 1:** Number of oysters during the temperature treatments for each population, with -1 and -2 denoting "replicates":_
 
