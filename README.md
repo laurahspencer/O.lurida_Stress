@@ -39,7 +39,7 @@ _**Table 2:** Number of each population sampled post-temperature treatment_; see
 
 --- 
 ### pH Treatment
-On [February 15th](https://laurahspencer.github.io/LabNotebook/OA-Exp-Day1/) oyster groups were again divided in half for a 2-month pH treatment, at pH ~7.8 and ~7.2 constituting ambient and low pH, respectively. Animals were housed in six 50L flow-through tanks, 3 replicates per pH treatment, were fed Reeds shellfish Diet via dosing pump at >XX thousand cells/mL, and co-habiatated with ~20 large _Crassostrea gigas_ per tank.  Temperature was measured continuously via [HOBO Data Loggers]() and discrete water samples were collected 3x/week with simultaneous T, S & pH parameters measured. 
+On [February 15th](https://laurahspencer.github.io/LabNotebook/OA-Exp-Day1/) oyster groups were again divided in half for a 2-month pH treatment, at pH ~7.8 and ~7.2 constituting ambient and low pH, respectively. Animals were housed in six 50L flow-through tanks, 3 replicates per pH treatment, were fed continuously with Reeds shellfish Diet via dosing pump, and co-habiatated with ~20 large _Crassostrea gigas_ per tank.  Temperature was measured continuously via [HOBO Data Loggers]() and discrete water samples were collected 3x/week with simultaneous T, S & pH parameters measured. 
 
 pH treatments were terminated on April 8, and a subset of SN, HC, NF were again sampled on [2/8](https://laurahspencer.github.io/LabNotebook/OA-Day52/) and K on [2/13](https://laurahspencer.github.io/LabNotebook/Sampling-Ks/) using the same protocol as the February sampling dates. All samples were again labeled and housed in Rick's -80 freezer. 
 
@@ -67,10 +67,25 @@ _**Table 3:** Number of each population sampled post-pH treatment; see [20170408
 
 ---
 ### Conditioning for Spawn
-On [April 11th Olys were moved](https://laurahspencer.github.io/LabNotebook/Conditioning-Olys/) into a 50L flow-through tank equipped with a recirculating heater to condition them for the spring spawn. Temperature was raised ~1degC/day to ~18degC, the target temperature for broodstock conditioning.   
+On [April 11th remaining Olys were moved](https://laurahspencer.github.io/LabNotebook/Conditioning-Olys/) into a single flow-through tank equipped with a recirculating heater to condition them for spawn and house them while I replumbed/reconfigured the space. Temperature was raised ~1degC/day to reach the target temperature of 18degC, however the heater was not capable of maintaining 18degC, so the actual temperature in this setup was closer to ~15degC.  Olys spent ~3 weeks in this single recirculating tank, then they [moved to their separate spawning buckets on May 2nd](https://laurahspencer.github.io/LabNotebook/Moving-Olys-to-Buckets/). [Broodstock were bleach-treated](https://laurahspencer.github.io/LabNotebook/Spring-Cleaning/) to kill worm hitchhikers, this after finding a plethora of arthropod worms pop out of the _gigas_ that co-habitated with my Olys during the pH treatment. 
+
+Let's review the treatment groups: 
+  * 4 "populations": 
+    - 3 distinct F1 populations: Oyster Bay (SS), Dabob Bay (HC), Fidalgo Bay (NF)
+    - 1 distinct F2 population: progeny from Oyster Bay F1 (K)
+  * 2 temperature treatments & 2 pH treatments per population = **16 broodstock treatment groups**
+    - SS: 6C+7.2pH, 6C+7.8pH, 10C+7.2pH, 10C+7.8pH x 2 for spawning buckets
+    - HC: 6C+7.2pH, 6C+7.8pH, 10C+7.2pH, 10C+7.8pH
+    - NF: 6C+7.2pH, 6C+7.8pH, 10C+7.2pH, 10C+7.8pH x 2 for spawning buckets
+    - K:  6C+7.2pH, 6C+7.8pH, 10C+7.2pH, 10C+7.8pH
+  * Space was limited. I split each SS and NF broodstock treatment group into 2 buckets for spawning but did not split the HC or K groups. 
 
 ### Larval Collection
-yada yada yada
+Eureka! I began observing larvae on [May 11th](https://laurahspencer.github.io/LabNotebook/Spring-Hatchlings/) from both K-10deg groups.  Because it can take up to 12 days from fertilized eggs to free-swimming larvae, and because all Olys were housed in the same tank until May 2nd, I waited until May 18th to begin rearing any larvae.  From May 11-May 18 I collected, counted, and sampled, but did not grow larave (except for system-testing my buckets). 
+
+[May 21st](https://laurahspencer.github.io/LabNotebook/Manchester5-21/) was the first official larval stocking date. Larvae were grown in 5-gallon buckets with 18degC flow-through seawater filtered to 5um with live algae cocktail dosed continuously via peristaltic pump. Each bucket was equipped with an air stone and inflowing water at 26L/hr, which was heated to ~18degC in a large header tank.  Larval buckets were stocked to a maximum density of approximately 200,000 larvae as per bucket as per the following calculations, which were informed by the PSRF & the FAO manual, which advises ** 1 larva/mL for 1 tank turnover/day**
+  * Larvae stocking equation: (24 hrs / (Tank Vol (L) / (flow rate)))1 larvae/mLTank Vol (L) * 1000mL/L = # larvae/mL to stock in bucket  
+  * Calculation: (24hrs/(15L/8 L/hr))*1 larva/mL * 15 L * 1000 mL/L = 192,000 larvae. I’m going to round up to 200,000 larvae  
 
 ### Larval Rearing 
 yada yada yada
