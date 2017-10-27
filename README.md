@@ -82,7 +82,26 @@ Let's review the treatment groups:
 
 --- 
 ### Larval Collection
-Eureka! I began observing larvae on [May 11th](https://laurahspencer.github.io/LabNotebook/Spring-Hatchlings/) from both K-10deg groups.  Because it can take up to 12 days from fertilized eggs to free-swimming larvae, and because all Olys were housed in the same tank until May 2nd, I waited until May 18th to begin rearing any larvae.  From May 11-May 18 I collected, counted, and sampled, but did not grow larave (except for system-testing my buckets).  Larvae were also collected, counted, and sampled daily (mostly) through July 10th, providing [2 months spawning data](https://laurahspencer.github.io/LabNotebook/OlySpawningCharts/). 
+Eureka! I began observing larvae on [May 11th](https://laurahspencer.github.io/LabNotebook/Spring-Hatchlings/) from both K-10deg groups.  Because it can take up to 12 days from fertilized eggs to free-swimming larvae, and because all Olys were housed in the same tank until May 2nd, I waited until May 18th to begin rearing any larvae.  From May 11-May 18 I collected, counted, and sampled, but did not grow larave (except for system-testing my buckets).  Larvae were also collected, counted, and sampled daily (mostly) through July 10th, providing [2 months spawning data](https://laurahspencer.github.io/LabNotebook/OlySpawningCharts/). I have ~80 vials of larvae frozen in Rick's -80 from the following groups: 
+
+| Treatment Grp | # Samples in -80 | Total # larvae in samples | Ave # larvae in samples | 
+|---------------|------------------|---------------------------|-------------------------| 
+| NF-10 Ambient | 5                |  550,120                  |  110,024                | 
+| NF-10 Low     | 2                |  157,117                  |  78,558                 | 
+| NF-6 Ambient  | 2                |  146,033                  |  73,017                 | 
+| NF-6 Low      | 7                |  752,835                  |  107,548                | 
+| SN-10 Ambient | 13               |  1,332,420                |  102,494                | 
+| SN-10 Low     | 8                |  725,307                  |  90,663                 | 
+| SN-6 Ambient  | 7                |  947,383                  |  135,340                | 
+| SN-6 Low      | 10               |  1,474,860                |  147,486                | 
+| HL-10 Ambient | 4                |  306,610                  |  76,653                 | 
+| HL-10 Low     | 5                |  394,313                  |  78,863                 | 
+| HL-6 Ambient  | 1                |  39,400                   |  39,400                 | 
+| HL-6 Low      | 3                |  553,900                  |  184,633                | 
+| K-10 Ambient  | 3                |  27,843                   |  9,281                  | 
+| K-10 Low      | 3                |  338,017                  |  112,672                | 
+| K-6 Ambient   | 4                |  163,777                  |  40,944                 | 
+| K-6 Low       | 5                |  190,357                  |  38,071                 | 
 
 ---
 ### Larval Stocking 
