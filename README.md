@@ -1,4 +1,4 @@
-# Climate adaptation in _Ostrea lurida_ via transgenerational epigenetic inheritance
+# Climate adaptation in _Ostrea lurida_ via transgenerational inheritance
 
 #### This repo houses data for the 2016-onwards _Ostrea lurida_ experiment on gonad maturation, larval production, and larval recruitment under varying temperature and pH overwintering treatments.  This project is being conducted at the Kenneth K. Chew Center for Shellfish Research & Restoration, at the NOAA Manchester Laboratory.  The following is a narrative of the project with links to pertinent notebook entries and data. 
 
