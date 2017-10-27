@@ -5,8 +5,8 @@
 ---
 ### Populations
 In December 2016 four groups of _Ostrea lurida_ were moved from pearl nets hanging off the NOAA dock in Clam Bay, Manchester WA into the the Ken Chew Center's hatcery.  Populations include: 
-  1. Three groups of first-generation hatchery-produced (F1) oysters, all hatched at the Port Gamble in 2013 by Puget Sound Restoration Fund staff and Jake Heare, UW SAFS graduate student. The broodstock used to produce these F1 oysters were wild, harvested from Fidalgo Bay in North Puget Sound (NF, for "North-Fidalgo"), Dabob Bay in Hood Canal (HC, for "Hood Canal"), and Oyster Bay in South Puget Sound (SS, for "South South"). 
-  2. One group of second-generation hatchery-produced (F2) oysters (K, for "Katherine"), hatched at the Ken Chew Center in 2015 by Katherine Silliman, University of Chicago graduate student. The broodstock used to produce these F2 oysters were the aforementioned F1 oysters from Oyser Bay in South Sound.
+  - **Three groups** of first-generation hatchery-produced (F1) oysters, all hatched at Port Gamble in 2013 by Puget Sound Restoration Fund staff and Jake Heare, UW SAFS graduate student. The broodstock used to produce these F1 oysters were wild, harvested from Fidalgo Bay in North Puget Sound (NF, for "North-Fidalgo"), Dabob Bay in Hood Canal (HC, for "Hood Canal"), and Oyster Bay in South Puget Sound (SS, for "South South"). 
+  - **One group** of second-generation hatchery-produced (F2) oysters (K, for "Katherine"), hatched at the Ken Chew Center in 2015 by Katherine Silliman, University of Chicago graduate student. The broodstock used to produce these F2 oysters were the aforementioned F1 oysters from Oyser Bay in South Sound.
   
 _**Figure**: Sites where Oly populations' progenitors were collected (F, D, O) and where Olys were housed prior to experiment (C). Source: [Heare JE, White SJ, Vadopalas B, Roberts SB. (2017) Differential response to stress in Ostrea lurida as measured by gene expression. PeerJ Preprints 5:e1595v3](https://doi.org/10.7287/peerj.preprints.1595v3)_
 ![Oly population sites](Images/Oly-population-sites-Heare.png?raw=true)
