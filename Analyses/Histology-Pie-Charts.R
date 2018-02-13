@@ -69,6 +69,163 @@ for (i in 1:length(Pops)) {
 # Resource: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
 
 library("gplots")
+
+All.Gonad.Stages <- rbind(All.6, All.6.Amb, All.6.Low, All.10, All.10.Amb, All.10.Low)
+CT.Sex.preOA.ALL <- table(subset(All.Gonad.Stages, Phase %in% "TEMP")$Treatment, subset(All.Gonad.Stages, Phase %in% "TEMP")$Sex)
+CT.stage.preOA.ALL <- table(subset(All.Gonad.Stages, Phase %in% "TEMP")$Treatment, subset(All.Gonad.Stages, Phase %in% "TEMP")$Stage)
+CT.Sex.preOA.ALL <- CT.Sex.preOA.ALL[c(1,4),]
+CT.stage.preOA.ALL <- CT.stage.preOA.ALL[c(1,4),]
+CT.Sex.postOA.ALL <- table(subset(All.Gonad.Stages, Phase %in% "OA")$Treatment, subset(All.Gonad.Stages, Phase %in% "OA")$Sex)
+CT.stage.postOA.ALL <- table(subset(All.Gonad.Stages, Phase %in% "OA")$Treatment, subset(All.Gonad.Stages, Phase %in% "OA")$Stage)
+CT.Sex.postOA.ALL <- CT.Sex.postOA.ALL[c(-1,-4),]
+CT.stage.postOA.ALL <- CT.stage.postOA.ALL[c(-1,-4),]
+
+# Let's compare the pre-OA stage and sex data
+chisq.test(CT.Sex.preOA.ALL) 
+chisq.test(CT.stage.preOA.ALL) 
+
+balloonplot(CT.Sex.preOA.ALL, main ="Oly Sex pre-OA, All Populations \nX-squared = 4.6128, df = 4, p-value = 0.3294", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.stage.preOA.ALL, main ="Oly Stage pre-OA, All Populations \nX-squared = 1.0756, df = 2, p-value = 0.584", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+# Let's compare the post-OA stage and sex data, all treatments
+fisher.test(CT.Sex.postOA.ALL)
+chisq.test(CT.stage.postOA.ALL)
+
+balloonplot(CT.Sex.postOA.ALL, main ="Oly Sex post OA, All Populations \np-value = 0.9143", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.stage.postOA.ALL, main ="Oly Stage post OA, All Populations \nX-squared = 16.09, df = 6, p-value = 0.01328", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+# Run same stats on each population separately: 
+SN.6.preOA.All <- subset(All.Gonad.Stages, Population %in% "SN" & Phase %in% "TEMP")
+NF.6.preOA.All <- subset(All.Gonad.Stages, Population %in% "NF" & Phase %in% "TEMP")
+K.6.preOA.All <- subset(All.Gonad.Stages, Population %in% "K" & Phase %in% "TEMP")
+HL.6.preOA.All <- subset(All.Gonad.Stages, Population %in% "HL" & Phase %in% "TEMP")
+
+SN.6.postOA.All <- subset(All.Gonad.Stages, Population %in% "SN" & Phase %in% "OA")
+NF.6.postOA.All <- subset(All.Gonad.Stages, Population %in% "NF" & Phase %in% "OA")
+K.6.postOA.All <- subset(All.Gonad.Stages, Population %in% "K" & Phase %in% "OA")
+HL.6.postOA.All <- subset(All.Gonad.Stages, Population %in% "HL" & Phase %in% "OA")
+
+# Contingency tables for each population, by Sex and Stage, for post-OA treatment groups
+CT.SN.Sex.preOA <- table(SN.6.preOA.All$Treatment, SN.6.preOA.All$Sex)
+CT.SN.stage.preOA <- table(SN.6.preOA.All$Treatment, SN.6.preOA.All$Stage)
+CT.NF.Sex.preOA <- table(NF.6.preOA.All$Treatment, NF.6.preOA.All$Sex)
+CT.NF.stage.preOA <- table(NF.6.preOA.All$Treatment, NF.6.preOA.All$Stage)
+CT.K.Sex.preOA <- table(K.6.preOA.All$Treatment, K.6.preOA.All$Sex)
+CT.K.stage.preOA <- table(K.6.preOA.All$Treatment, K.6.preOA.All$Stage)
+CT.HL.Sex.preOA <- table(HL.6.preOA.All$Treatment, HL.6.preOA.All$Sex)
+CT.HL.stage.preOA <- table(HL.6.preOA.All$Treatment, HL.6.preOA.All$Stage)
+
+# remove extraneous rows
+CT.SN.Sex.preOA <- CT.SN.Sex.preOA[c(1,4),]
+CT.SN.stage.preOA <- CT.SN.stage.preOA[c(1,4),]
+CT.NF.Sex.preOA <- CT.NF.Sex.preOA[c(1,4),]
+CT.NF.stage.preOA <- CT.NF.stage.preOA[c(1,4),]
+CT.K.Sex.preOA <- CT.K.Sex.preOA[c(1,4),]
+CT.K.stage.preOA <- CT.K.stage.preOA[c(1,4),]
+CT.HL.Sex.preOA <- CT.HL.Sex.preOA[c(1,4),]
+CT.HL.stage.preOA <- CT.HL.stage.preOA[c(1,4),]
+
+# Contingency tables for each population, by Sex and Stage, for post-OA treatment groups
+CT.SN.Sex.postOA <- table(SN.6.postOA.All$Treatment, SN.6.postOA.All$Sex)
+CT.SN.stage.postOA <- table(SN.6.postOA.All$Treatment, SN.6.postOA.All$Stage)
+CT.NF.Sex.postOA <- table(NF.6.postOA.All$Treatment, NF.6.postOA.All$Sex)
+CT.NF.stage.postOA <- table(NF.6.postOA.All$Treatment, NF.6.postOA.All$Stage)
+CT.K.Sex.postOA <- table(K.6.postOA.All$Treatment, K.6.postOA.All$Sex)
+CT.K.stage.postOA <- table(K.6.postOA.All$Treatment, K.6.postOA.All$Stage)
+CT.HL.Sex.postOA <- table(HL.6.postOA.All$Treatment, HL.6.postOA.All$Sex)
+CT.HL.stage.postOA <- table(HL.6.postOA.All$Treatment, HL.6.postOA.All$Stage)
+
+# remove extraneous rows
+CT.SN.Sex.postOA <- CT.SN.Sex.postOA[c(-1,-4),]
+CT.SN.stage.postOA <- CT.SN.stage.postOA[c(-1,-4),]
+CT.NF.Sex.postOA <- CT.NF.Sex.postOA[c(-1,-4),]
+CT.NF.stage.postOA <- CT.NF.stage.postOA[c(-1,-4),]
+CT.K.Sex.postOA <- CT.K.Sex.postOA[c(-1,-4),]
+CT.K.stage.postOA <- CT.K.stage.postOA[c(-1,-4),]
+CT.HL.Sex.postOA <- CT.HL.Sex.postOA[c(-1,-4),]
+CT.HL.stage.postOA <- CT.HL.stage.postOA[c(-1,-4),]
+
+# Fisher's exact test, pre OA
+fisher.test(CT.SN.Sex.preOA)
+fisher.test(CT.K.Sex.preOA)
+fisher.test(CT.NF.Sex.preOA)
+fisher.test(CT.HL.Sex.preOA)
+fisher.test(CT.SN.stage.preOA)
+fisher.test(CT.K.stage.preOA)
+fisher.test(CT.NF.stage.preOA)
+fisher.test(CT.HL.stage.preOA)
+
+# Balloon plots, pre OA
+balloonplot(CT.SN.Sex.preOA, main ="Oly Sex Pre-OA, South Sound F1 \np-value = 0.6762", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.K.Sex.preOA, main ="Oly Sex Pre-OA, South Sound F2 \np-value = 0.5732", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.NF.Sex.preOA, main ="Oly Sex Pre-OA, North Sound F1 \np-value = 0.08721", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.HL.Sex.preOA, main ="Oly Sex Pre-OA, Hood Canal F1 \np-value = 0.006993", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.SN.stage.preOA, main ="Oly Stage Pre-OA, South Sound F1 \np-value = 0.1693", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.K.stage.preOA, main ="Oly Stage Pre-OA, South Sound F2 \np-value = 0.4068", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.NF.stage.preOA, main ="Oly Stage Pre-OA, North Sound F1 \np-value = 1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.HL.stage.preOA, main ="Oly Stage Pre-OA, Hood Canal F1 \np-value = 1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+# Fisher's exact test, post OA
+fisher.test(CT.SN.Sex.postOA)
+fisher.test(CT.K.Sex.postOA)
+fisher.test(CT.NF.Sex.postOA)
+fisher.test(CT.HL.Sex.postOA)
+fisher.test(CT.SN.stage.postOA)
+fisher.test(CT.K.stage.postOA)
+fisher.test(CT.NF.stage.postOA)
+fisher.test(CT.HL.stage.postOA)
+
+# Balloon plots, post OA
+balloonplot(CT.SN.Sex.postOA, main ="Oly Sex post-OA, South Sound F1 \np-value = 0.6234", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.K.Sex.postOA, main ="Oly Sex post-OA, South Sound F2 \np-value = 0.02684", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.NF.Sex.postOA, main ="Oly Sex post-OA, North Sound F1 \np-value = 0.2749", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.HL.Sex.postOA, main ="Oly Sex post-OA, Hood Canal F1 \np-value = 0.2337", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.SN.stage.postOA, main ="Oly Stage post-OA, South Sound F1 \np-value = 0.7004", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.K.stage.postOA, main ="Oly Stage post-OA, South Sound F2 \np-value = 0.1614", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.NF.stage.postOA, main ="Oly Stage post-OA, North Sound F1 \np-value = 0.02735", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.HL.stage.postOA, main ="Oly Stage post-OA, Hood Canal F1 \np-value = 0.7569", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+# Fisher's exact test, post OA
+fisher.test(CT.SN.Sex.postOA)
+fisher.test(CT.SN.stage.postOA)
+fisher.test(CT.K.Sex.postOA)
+fisher.test(CT.K.stage.postOA)
+fisher.test(CT.NF.Sex.postOA)
+fisher.test(CT.NF.stage.postOA)
+fisher.test(CT.HL.Sex.postOA)
+fisher.test(CT.HL.stage.postOA)
+
+
+
+
+
+
+
+
+
+
+
+
 All.6.Gonad.Stages <- rbind(All.6, All.6.Amb, All.6.Low)
 CT.Sex <- table(All.6.Gonad.Stages$Treatment, All.6.Gonad.Stages$Sex)
 CT.Sex.postOA <- table(subset(All.6.Gonad.Stages, Phase %in% "OA")$Treatment, subset(All.6.Gonad.Stages, Phase %in% "OA")$Sex)
