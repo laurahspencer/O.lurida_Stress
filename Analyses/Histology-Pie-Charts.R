@@ -69,30 +69,37 @@ for (i in 1:length(Pops)) {
 # Resource: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
 
 library("gplots")
-test.all <- rbind(All.6, All.6.Amb, All.6.Low)
-test.Sex <- table(test.all$Treatment, test.all$Sex)
-test.stage <- table(test.all$Treatment, test.all$Stage)
-test.Sex <- test.Sex[-1:-3,]
-test.stage <- test.stage[-1:-3,]
+All.6.Gonad.Stages <- rbind(All.6, All.6.Amb, All.6.Low)
+CT.Sex <- table(All.6.Gonad.Stages$Treatment, test.all$Sex)
+CT.stage <- table(All.6.Gonad.Stages$Treatment, test.all$Stage)
+CT.Sex <- CT.Sex[-1:-3,]
+CT.stage <- CT.stage[-1:-3,]
 
-balloonplot(test.Sex, main ="Oly Sex", xlab ="", ylab="",
+balloonplot(CT.Sex, main ="Oly Sex", xlab ="", ylab="",
             label = T, show.margins = FALSE)
-balloonplot(test.stage, main ="Oly Stage", xlab ="", ylab="",
+balloonplot(CT.stage, main ="Oly Stage", xlab ="", ylab="",
             label = T, show.margins = FALSE)
 
 library("graphics")
-mosaicplot(test.Sex, shade = TRUE, las=2, main = "Oly Sex")
-mosaicplot(test.stage, shade = TRUE, las=2, main = "Oly Stage")
+mosaicplot(CT.Sex, shade = TRUE, las=2, main = "Oly Sex")
+mosaicplot(CT.stage, shade = TRUE, las=2, main = "Oly Stage")
 
-chisq.sex <- chisq.test(test.Sex)
-chisq.stage <- chisq.test(test.stage)
+# Stats on Sex data
+chisq.sex <- chisq.test(CT.Sex) #p-value = 0.2932; also I read that the warning message may be a result of little data.
+fisher.test(CT.Sex) #p-value = 0.2942, using Fisher's Exact Test for Count Data 
+
+# Stats on Stage data
+chisq.stage <- chisq.test(CT.stage) #p-value = 0.002478
+fisher.test(CT.stage) #p-value = 0.003477 #using this test too, since I had to use it for the Sex data. 
+
 chisq.stage$observed
 chisq.stage$expected
 round(chisq.stage$residuals, 3)
+
 install.packages("corrplot")
 library(corrplot)
-corrplot(chisq.stage$residuals, is.corr = F)
-
+corrplot(chisq.stage$residuals, is.corr = F, main="Oly Stage, Correlation Plot")
+corrplot(chisq.sex$residuals, is.corr = F, main="Oly Sex, Correlation Plot")
 
 ### boneyard
 
