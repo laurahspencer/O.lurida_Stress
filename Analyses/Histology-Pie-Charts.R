@@ -70,8 +70,8 @@ for (i in 1:length(Pops)) {
 
 library("gplots")
 All.6.Gonad.Stages <- rbind(All.6, All.6.Amb, All.6.Low)
-CT.Sex <- table(All.6.Gonad.Stages$Treatment, test.all$Sex)
-CT.stage <- table(All.6.Gonad.Stages$Treatment, test.all$Stage)
+CT.Sex <- table(All.6.Gonad.Stages$Treatment, All.6.Gonad.Stages$Sex)
+CT.stage <- table(All.6.Gonad.Stages$Treatment, All.6.Gonad.Stages$Stage)
 CT.Sex <- CT.Sex[-1:-3,]
 CT.stage <- CT.stage[-1:-3,]
 
@@ -100,6 +100,72 @@ install.packages("corrplot")
 library(corrplot)
 corrplot(chisq.stage$residuals, is.corr = F, main="Oly Stage, Correlation Plot")
 corrplot(chisq.sex$residuals, is.corr = F, main="Oly Sex, Correlation Plot")
+
+# Run same stats on each population separately: 
+SN.6 <- subset(All.6.Gonad.Stages, Population %in% "SN")
+NF.6 <- subset(All.6.Gonad.Stages, Population %in% "NF")
+K.6 <- subset(All.6.Gonad.Stages, Population %in% "K")
+HL.6 <- subset(All.6.Gonad.Stages, Population %in% "HL")
+
+# Contingency tables for each population, by Sex and Stage
+CT.SN.Sex <- table(SN.6$Treatment, SN.6$Sex)
+CT.SN.stage <- table(SN.6$Treatment, SN.6$Stage)
+CT.NF.Sex <- table(NF.6$Treatment, NF.6$Sex)
+CT.NF.stage <- table(NF.6$Treatment, NF.6$Stage)
+CT.K.Sex <- table(K.6$Treatment, K.6$Sex)
+CT.K.stage <- table(K.6$Treatment, K.6$Stage)
+CT.HL.Sex <- table(HL.6$Treatment, HL.6$Sex)
+CT.HL.stage <- table(HL.6$Treatment, HL.6$Stage)
+
+# Remove extraneous rows
+CT.SN.Sex <- CT.SN.Sex[-1:-3,]
+CT.SN.stage <- CT.SN.stage[-1:-3,]
+CT.NF.Sex <- CT.NF.Sex[-1:-3,]
+CT.NF.stage <- CT.NF.stage[-1:-3,]
+CT.K.Sex <- CT.K.Sex[-1:-3,]
+CT.K.stage <- CT.K.stage[-1:-3,]
+CT.HL.Sex <- CT.HL.Sex[-1:-3,]
+CT.HL.stage <- CT.HL.stage[-1:-3,]
+
+chisq.test(CT.SN.Sex)
+chisq.test(CT.SN.stage)
+chisq.test(CT.NF.Sex)
+chisq.test(CT.NF.stage)
+chisq.test(CT.K.Sex)
+chisq.test(CT.K.stage)
+chisq.test(CT.HL.Sex)
+chisq.test(CT.HL.stage)
+
+# Sample size small, so use fisher's test
+fisher.test(CT.SN.Sex)
+fisher.test(CT.SN.stage)
+fisher.test(CT.NF.Sex)
+fisher.test(CT.NF.stage)
+fisher.test(CT.K.Sex)
+fisher.test(CT.K.stage)
+fisher.test(CT.HL.Sex)
+fisher.test(CT.HL.stage)
+
+
+balloonplot(CT.SN.Sex, main ="Oly Sex, South Sound F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.SN.stage, main ="Oly Stage, South Sound F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+balloonplot(CT.NF.Sex, main ="Oly Sex, North Sound F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.NF.stage, main ="Oly Stage, North Sound F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+balloonplot(CT.K.Sex, main ="Oly Sex, South Sound F2", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.K.stage, main ="Oly Stage, South Sound F2", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+balloonplot(CT.HL.Sex, main ="Oly Sex, Hood Canal F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(CT.HL.stage, main ="Oly Stage, Hood Canal F1", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
 
 ### boneyard
 
