@@ -65,6 +65,35 @@ for (i in 1:length(Pops)) {
 }
 
 
+### Stats
+# Resource: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
+
+library("gplots")
+test.all <- rbind(All.6, All.6.Amb, All.6.Low)
+test.Sex <- table(test.all$Treatment, test.all$Sex)
+test.stage <- table(test.all$Treatment, test.all$Stage)
+test.Sex <- test.Sex[-1:-3,]
+test.stage <- test.stage[-1:-3,]
+
+balloonplot(test.Sex, main ="Oly Sex", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+balloonplot(test.stage, main ="Oly Stage", xlab ="", ylab="",
+            label = T, show.margins = FALSE)
+
+library("graphics")
+mosaicplot(test.Sex, shade = TRUE, las=2, main = "Oly Sex")
+mosaicplot(test.stage, shade = TRUE, las=2, main = "Oly Stage")
+
+chisq.sex <- chisq.test(test.Sex)
+chisq.stage <- chisq.test(test.stage)
+chisq.stage$observed
+chisq.stage$expected
+round(chisq.stage$residuals, 3)
+install.packages("corrplot")
+library(corrplot)
+corrplot(chisq.stage$residuals, is.corr = F)
+
+
 ### boneyard
 
 # Histo$Stage <- as.factor(Histo$Stage)
