@@ -1,6 +1,5 @@
+setwd("~/Documents/Roberts Lab/O.lurida_Stress")
 Bucket.Densities <- read.csv("Data/Bucket-Densities.csv", header = T, stringsAsFactors = F, na.strings = " -   ")
-Bucket.Densities
-View(Bucket.Densities)
 library(plotly)
 library(reshape2)
 as.numeric(Bucket.Densities[,-1])
