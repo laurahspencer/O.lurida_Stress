@@ -1,4 +1,5 @@
-Histo.postOA.redo <- read.csv("../Data/2017-Oly-Histo-Results-REDO.csv", header=T, stringsAsFactors = T, na.strings = "TBD")
+setwd("~/Documents/Roberts Lab/O.lurida_Stress")
+Histo.postOA.redo <- read.csv("Data/2017-Oly-Histo-Results-REDO.csv", header=T, stringsAsFactors = T, na.strings = "TBD")
 Histo.postOA.redo$STAGE <- as.factor(Histo.postOA.redo$STAGE)
 View(Histo.postOA.redo)
 
@@ -54,3 +55,4 @@ balloonplot(CT.NF.STAGE.postOA.redo, main ="Oly STAGE post-OA, North Sound F1 \n
             label = T, show.margins = FALSE)
 balloonplot(CT.HL.STAGE.postOA.redo, main ="Oly STAGE post-OA, Hood Canal F1 \np-value = 0.9413", xlab ="", ylab="",
             label = T, show.margins = FALSE)
+
