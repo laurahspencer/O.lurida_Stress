@@ -9,8 +9,8 @@ salinity.low <- c(mean(28.3, 28.1, 28.0), mean(28.2, 28.1, 282.2), mean(26.4, 26
 salinity.ambient <- c(mean(28.1, 28.1, 28.2), mean(28.3, 28.2, 28.2), mean(26.5, 26.5, 26.5))
 pH.ambient <- c(7.82, 7.81, 7.82) #unit = pH(total)
 pH.low <- c(7.33, 7.31, 7.29) #unit = pH(total)
-ta.ambient <- c(2307, 2747, 2611) #unit = µmol/kg, need to convert to mol/kg
-ta.low <- c(2332, 2918, 2808) #unit = µmol/kg, need to convert to mol/kg 
+ta.ambient <- 0.75*c(2307, 2747, 2611) #unit = µmol/kg, need to convert to mol/kg - 75% is ~offset from TA CRM's
+ta.low <- 0.75*c(2332, 2918, 2808) #unit = µmol/kg, need to convert to mol/kg 
 
 # pH and AT are known:
 test.pCO2.ambient <- carb(flag=8, var1=pH.ambient, var2=(ta.ambient/1e6), S=salinity.ambient, T=temp.ambient, pHscale="T") # 
