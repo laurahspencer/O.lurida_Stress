@@ -1,8 +1,6 @@
-setwd("~/Documents/Roberts Lab/O.lurida_Stress")
 Histo.postOA.redo <- read.csv("Data/2017-Oly-Histo-Results-REDO.csv", header=T, stringsAsFactors = T, na.strings = "TBD")
 Histo.postOA.redo$STAGE <- as.factor(Histo.postOA.redo$STAGE)
-View(Histo.postOA.redo)
-
+head(Histo.postOA.redo)
 ### Stats
 # Resource: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
 library("gplots")
@@ -56,3 +54,13 @@ balloonplot(CT.NF.STAGE.postOA.redo, main ="Oly STAGE post-OA, North Sound F1 \n
 balloonplot(CT.HL.STAGE.postOA.redo, main ="Oly STAGE post-OA, Hood Canal F1 \np-value = 0.9413", xlab ="", ylab="",
             label = T, show.margins = FALSE)
 
+# try glm 
+head(Histo.postOA.redo)
+glm.tbl.stage <- aggregate(SAMPLE.. ~ STAGE + TREATMENT + TEMPERATURE + PH, Histo.postOA.redo, length, na.action = na.omit)
+glm.stage <- glm(SAMPLE.. ~  TREATMENT + STAGE, family = poisson, data=glm.tbl.stage)
+anova(glm.stage)
+1-pf((21.6231/(11.677/8)), 4,8) #stage 
+1-pf((3.0978/(33.300/12)), 3,12) #treatment 
+summary(glm.stage)
+glm.tbl.stage$TREATMENT <- relevel(glm.tbl.stage$TREATMENT, ref = "6-AMBIENT")       
+levels(glm.tbl.stage$TREATMENT)
