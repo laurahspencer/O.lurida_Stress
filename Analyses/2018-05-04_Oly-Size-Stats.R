@@ -1,12 +1,12 @@
 library(reshape2)
-
-Oly.size <- read.csv("Data/2018-05-04_Oly-Size.csv", header = T, stringsAsFactors = T)
-Oly.size.long <- melt(Oly.size[c(-4:-5)], id.vars = c("GROUP", "COHORT", "TREATMENT", "TEMP", "PH"), na.action = na.omit) 
+head(Oly.size)
+Oly.size <- read.csv("Data/9-month-Oly-Size.csv", header = T, stringsAsFactors = T)
+Oly.size.long <- melt(Oly.size[c(-1, -7, -8)], id.vars = c("GROUP", "COHORT", "TREATMENT", "TEMP", "PH"), na.action = na.omit) 
 Oly.size.long$value <- as.numeric(Oly.size.long$value)
 
 # Create dataframe with pop/treat groups, stocking density 
-groups <- c("HL10-AMB", "HL10-LOW", "HL6-AMB", "HL6-LOW", "K10-AMB", "K10-LOW", "K6-AMB", "K6-LOW", "NF10-AMB", "NF10-LOW", "NF6-AMB", "NF6-LOW", "SN10-AMB", "SN10-LOW", "SN6-AMB", "SN6-LOW")
-stocked <- c(1311, 1091, 501, 834, 259, 122, 372, 341, 661, 77, 1508, 684, 54, 35, 128, 211)
+groups <- c("HL10-AMB", "HL10-LOW", "HL6-AMB", "HL6-LOW", "K10-AMB", "K10-LOW", "K6-AMB", "K6-LOW", "NF10-AMB", "NF10-LOW", "NF6-AMB", "NF6-LOW", "SN10-AMB", "SN10-LOW", "SN6-AMB", "SN6-LOW",  "SN10-AMB-Exp", "SN10-LOW-Exp", "SN6-AMB-Exp", "SN6-LOW-Exp")
+stocked <- c(1311, 1091, 501, 834, 259, 122, 372, 341, 661, 77, 720, 684, 54, 35, 128, 211, 4, 19, 68, 194)
 stock.dens <- data.frame(cbind(groups, stocked), stringsAsFactors = F)
 stock.dens$stocked <- as.numeric(stock.dens$stocked)
 
@@ -26,9 +26,15 @@ pch.list <- as.numeric(Oly.size.summary3$TREATMENT)
 plot(x=Oly.size.summary3$stocked, y=Oly.size.summary3$Mean, xlab="Stocking Density", ylab = "Mean Length (mm)" , col=Oly.size.summary3$COHORT, pch=pch.list)
 
 library(ggplot2)
-ggplot(Oly.size.summary3[which(Oly.size.summary3$stocked<=500),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$stocked<=500),]$Group)
-ggplot(Oly.size.summary3[which(Oly.size.summary3$stocked>500),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$stocked>500),]$Group)
+ggplot(Oly.size.summary3, aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3$Group)
 
+ggplot(Oly.size.summary3[which(Oly.size.summary3$COHORT=="NF"),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$COHORT=="NF"),]$Group)
+
+ggplot(Oly.size.summary3[which(Oly.size.summary3$COHORT=="HL"),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$COHORT=="HL"),]$Group)
+
+ggplot(Oly.size.summary3[which(Oly.size.summary3$COHORT=="SN"),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$COHORT=="SN"),]$Group)
+
+ggplot(Oly.size.summary3[which(Oly.size.summary3$COHORT=="K"),], aes(x=stocked, y=Mean)) + geom_point() + geom_text(label=Oly.size.summary3[which(Oly.size.summary3$COHORT=="K"),]$Group)
 
 plot(x=Oly.size.summary3[which(Oly.size.summary3$COHORT=="HL"),]$stocked, y=Oly.size.summary3[which(Oly.size.summary3$COHORT=="HL"),]$Mean, main="Hood Canal,\nmean length ~ stocking density", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary3[which(Oly.size.summary3$COHORT=="HL"),]$TREATMENT, pch=19, cex=2)
 plot(x=Oly.size.summary3[which(Oly.size.summary3$COHORT=="NF"),]$stocked, y=Oly.size.summary3[which(Oly.size.summary3$COHORT=="NF"),]$Mean, main="North Sound,\nmean length ~ stocking density", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary3[which(Oly.size.summary3$COHORT=="NF"),]$TREATMENT, pch=19, cex=2)
@@ -45,16 +51,24 @@ plot(value ~ stocked, data=Oly.size.long2, col=TREATMENT)
 summary(lm(value ~ GROUP-1, data=Oly.size.long)) #mean and SE for each group 
 
 anova(Size.lm <- lm(value ~  stocked, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  stocked, data=Oly.size.long2))
+
 anova(Size.lm <- lm(value ~  COHORT, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  COHORT, data=Oly.size.long2))
+
 anova(Size.lm <- lm(value ~  TREATMENT, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  TREATMENT, data=Oly.size.long2))
 
 anova(Size.lm <- lm(value ~  COHORT+TREATMENT, data=Oly.size.long2))
-anova(Size.lm <- lm(value ~  COHORT+stocked, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  COHORT+TREATMENT, data=Oly.size.long2))
 
-anova(Size.lm <- lm(value ~  COHORT+TREATMENT+stocked, data=Oly.size.long2))
-anova(Size.lm <- lm(value ~  COHORT*TREATMENT*stocked, data=Oly.size.long2))
+anova(Size.lm <- lm(value ~  COHORT+stocked+TREATMENT, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  COHORT+stocked+TREATMENT, data=Oly.size.long2)) 
 
-
+anova(Size.lm <- lm(value ~  stocked*COHORT*TREATMENT, data=Oly.size.long2))
+summary(Size.lm <- lm(value ~  stocked*COHORT*TREATMENT, data=Oly.size.long2)) #highest R2
+plot(x=Oly.size.long2$stocked, y=Oly.size.long2$value)
+abline(Size.lm)
 
 library(ggplot2)
 library(ggpubr)
@@ -80,7 +94,7 @@ dev.off()
 png("Results/SSF1-9month-Length.png", width = 700, height = 500)
 ggdensity(data=subset(Oly.size.long, COHORT=="SN"), x = "value",
           add = "mean", rug = TRUE,
-          color = "TREATMENT", fill = "TREATMENT", palette = colors) + ggtitle("SOUTH SOUND F1 Size (mm)\n @ ~9months")
+          color = "TREATMENT", fill = "TREATMENT") + ggtitle("SOUTH SOUND F1 Size (mm)\n @ ~9months")
 dev.off()
 
 png("Results/SSF2-9month-Length.png", width = 700, height = 500)
