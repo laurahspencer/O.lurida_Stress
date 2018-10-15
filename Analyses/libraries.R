@@ -1,0 +1,15 @@
+list.of.packages <- c("ggplot2", "car", "mvoutlier", "reshape2", "stringr", "plotly", "ggpubr", "ggridges", "HH", "pwr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+library(ggplot2)
+library(car)
+library(mvoutlier)
+library(reshape2)
+library(stringr)
+library(plotly)
+library(ggplot2)
+library(ggpubr)
+library(ggridges)
+library(HH)
+library(pwr)

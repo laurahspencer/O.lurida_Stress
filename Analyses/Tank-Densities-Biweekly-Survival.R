@@ -1,10 +1,3 @@
-library(reshape2)
-library(stringr)
-library(plotly)
-
-library(ggplot2)
-library(ggpubr)
-library(ggridges)
 
 rm(list=ls())         #start script by deleting all objects - clean slate 
 
@@ -110,6 +103,7 @@ ggplot(subset(Bucket.Densities.wide, survival<1.5), aes(x=Treatment, y= survival
   theme_bw(base_size = 16) + xlab("Population") +
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
 
+
 # Test differences in survival between screening dates (counted & restocked 2x weekly) 
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), mean)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), median)
@@ -122,7 +116,9 @@ anova(glm(cbind(actual, dead) ~ Temperature+pH, data=subset(Bucket.Densities.wid
 
 # Test using aov on square-root arcsine transformed survival % data 
 hist(asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival))) # looks normal 
-shapiro.test(asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival)))  # shapiro test confirms  
+shapiro.test(asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival)))  # shapiro test confirms 
+bartlett.test(x=asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival)), g=subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$pH) #equal variance between pH
+bartlett.test(x=asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival)), g=subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$Temperature) #equal variance between Temps
 Bucket.Densities.wide$survival.t <- asin(sqrt(Bucket.Densities.wide$survival)) #add column with sqrt-asin transformed survival
 
 #save new dataframe with just the valid transformed % survival data, for models 
@@ -146,45 +142,25 @@ summary(lm(survival.t ~ expected, data=subset(survival.biweekly, Temperature == 
 plot(x=subset(survival.biweekly, Temperature==10)$expected, y=subset(survival.biweekly, Temperature==10)$survival.t)
 
 # Conclusion no sign. differences in % survival between low pH and ambient pH groups, nor between chilled/unchilled, as per biweekly count data 
-View(Bucket.Densities.wide)
 
 mean(subset(Bucket.Densities.wide, survival!="NA")$survival) #average % survival between screenings 
-var(subset(Bucket.Densities.wide, survival!="NA")$survival) #average % survival between screenings 
+sd(subset(Bucket.Densities.wide, survival!="NA")$survival) #average % survival between screenings 
 
 plot(x=survival.biweekly$expected, y=survival.biweekly$survival.t, col=survival.biweekly$Treatment, main="% survival (sqrt-asin transformed) ~ # stocked\n biweekly count data",  xlab="# stocked", ylab="% Survived (sqrt-asin transf.)", pch=16)
-
 legend(x="bottom", c("Unchilled-Ambient", "Unchilled-Low", "Chilled-Ambient", "Chilled-Low"),  box.col="gray75", cex=1, pch=16, col=survival.biweekly$Treatment) #can't get the legend points to be colored by treatment ... not super important 
 
 # Survival data by population 
 aggregate(survival ~ Population, survival.biweekly, mean, na.rm=TRUE)
 aggregate(survival ~ Population, survival.biweekly, sd, na.rm=TRUE)
 
-
-
-
-
-
-
-
-
 ### Compare # setters in setting tanks (used 2 setting tanks, new one started on 6/22)
 setters.stocking <- read.csv("Data/Setters-Stocking.csv", header = T, stringsAsFactors = T)
-t.test(x=subset(setters.stocking, Temperature==10 & pH == "Ambient")$Count, y=subset(setters.stocking, Temperature==10 & pH == "Low")$Count)
-t.test(x=subset(setters.stocking, Temperature==6 & pH == "Ambient")$Count, y=subset(setters.stocking, Temperature==6 & pH == "Low")$Count)
-
-ks.test(x=subset(setters.stocking, Temperature==10 & pH == "Ambient")$Count, y=subset(setters.stocking, Temperature==10 & pH == "Low")$Count)
-ks.test(x=subset(setters.stocking, Temperature==6 & pH == "Ambient")$Count, y=subset(setters.stocking, Temperature==6 & pH == "Low")$Count)
-
-kruskal.test(x=subset(setters.stocking, Temperature==10)$Count, g=subset(setters.stocking, Temperature==10)$pH)
+kruskal.test(x=setters.stocking$Count, g=setters.stocking$Temperature)
+kruskal.test(x=setters.stocking$Count, g=setters.stocking$pH)
+kruskal.test(x=setters.stocking$Count, g=setters.stocking$Population)
+kruskal.test(x=subset(setters.stocking, Temperature==10)$Count, g=subset(setters.stocking, Temperature==10)$pH) 
 kruskal.test(x=subset(setters.stocking, Temperature==6)$Count, g=subset(setters.stocking, Temperature==6)$pH)
-
-# are the # stocked (expected) and counted (actual) different between pH in 6C? No. 
-kruskal.test(x=subset(Bucket.Densities.wide, Temperature==6)$expected, g=subset(Bucket.Densities.wide, Temperature==6)$pH)
-kruskal.test(x=subset(Bucket.Densities.wide, Temperature==6)$actual, g=subset(Bucket.Densities.wide, Temperature==6)$pH)
-
-# in 10C? No. 
-kruskal.test(x=subset(Bucket.Densities.wide, Temperature==10)$expected, g=subset(Bucket.Densities.wide, Temperature==10)$pH)
-kruskal.test(x=subset(Bucket.Densities.wide, Temperature==10)$actual, g=subset(Bucket.Densities.wide, Temperature==10)$pH)
+# RESULT: no sign. differences in setter stocking density between temperature, pH or population 
 
 # barplot of setters - reminder that the large # of larvae stocked on June 15th were tossed (accidentally mixed with others)
 ggplot(data=Bucket.Densities.wide, aes(x=Date, y=setters, fill=Treatment)) + 
@@ -194,7 +170,7 @@ ggplot(data=Bucket.Densities.wide, aes(x=Date, y=setters, fill=Treatment)) +
   scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
   theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
 
-# barplot of # stocked  
+# barplot of # larvae stocked  
 ggplot(data=Bucket.Densities.wide, aes(x=Date, y=expected, fill=Treatment)) + 
   geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of larvae stocked") +
   ggtitle("Olympia oyster stocked over time, by treatment") + theme_bw(base_size = 16) +   
@@ -202,14 +178,13 @@ ggplot(data=Bucket.Densities.wide, aes(x=Date, y=expected, fill=Treatment)) +
   scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
   theme(legend.position = c(0.85, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
 
-# barplot of # stocked  
+# barplot of # larvae counted during biweekly screenings/counts   
 ggplot(data=Bucket.Densities.wide, aes(x=Date, y=actual, fill=Treatment)) + 
   geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("# live larvae counted") +
   ggtitle("Olympia oyster # larvae counted in bucket over time, by treatment") + theme_bw(base_size = 16) +   
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=16), legend.text = element_text(size=16), axis.title = element_text(size=18, face = "bold"))+
   scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
   theme(legend.position = c(0.85, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
-
 
 
 # ---------- Extra population-level plots 
@@ -220,3 +195,11 @@ ggplot(subset(Bucket.Densities.wide, survival<1.5), aes(x=Population, y= surviva
   labs(title="Percent survival between screenings\n(2x weekly, n=19)",y=expression("Percent Survival")) + 
   theme_bw(base_size = 16) + xlab("Population") +
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0)) + scale_fill_manual(values=c("royalblue4", "royalblue1", "turquoise4", "turquoise2"))
+
+# barplot of setters - reminder that the large # of SN larvae stocked on June 15th were tossed (accidentally mixed with others). The ones stocked June 19th were kept. 
+ggplot(data=Bucket.Densities.wide, aes(x=Date, y=setters, fill=Population)) + 
+  geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of Setters Counted") +
+  ggtitle("Olympia oyster setters over time, by Population") + theme_bw(base_size = 16) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=16), legend.text = element_text(size=16), axis.title = element_text(size=18, face = "bold"))+
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
+  theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
