@@ -1,15 +1,11 @@
-list.of.packages <- c("ggplot2", "car", "mvoutlier", "reshape2", "stringr", "plotly", "ggpubr", "ggridges", "HH", "pwr")
+list.of.packages <- c("ggplot2", "car", "mvoutlier", "reshape2", "stringr", "plotly", "ggpubr", "ggridges", "HH", "pwr", "reshape2", "rcompanion") #add new libraries here 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
-library(ggplot2)
-library(car)
-library(mvoutlier)
-library(reshape2)
-library(stringr)
-library(plotly)
-library(ggplot2)
-library(ggpubr)
-library(ggridges)
-library(HH)
-library(pwr)
+# Load all libraries 
+lapply(list.of.packages, FUN = function(X) {
+  do.call("require", list(X)) 
+})
+
+source("References/panelcor.R")
+

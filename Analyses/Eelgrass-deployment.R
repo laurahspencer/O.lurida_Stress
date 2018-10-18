@@ -11,6 +11,7 @@ Deploy.data$SIZE <- droplevels(Deploy.data$SIZE)
 Deploy.data$HAB.PH <- droplevels(Deploy.data$HAB.PH)
 Deploy.data$POP.PH.HAB <- droplevels(Deploy.data$POP.PH.HAB)
 str(Deploy.data)
+aggregate(DEPLOYED ~ POPULATION + PH, Deploy.data, mean) #number deployed in each group
 
 # Compare survival between habitats overall
 glm.outplant.survival <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*PH*HABITAT, data=Deploy.data, binomial)
@@ -268,9 +269,10 @@ Pre.length <- melt(subset(Oly.size, TEMP==6)[,c(-2,-4,-5,-8)], id.vars = c("BAG"
 Pre.length$value <- as.numeric(Pre.length$value)
 Pre.length <- subset(Pre.length, BAG != "NA" & (value != "NA" & value != "s" & value != ""))
 Pre.length$BAG <- as.factor(Pre.length$BAG)
-
 Pre.length.mean <- aggregate(value ~ BAG + COHORT + PH + SIZE.CLASS, Pre.length, mean, na.rm=TRUE)
 colnames(Pre.length.mean) <- c("BAG", "COHORT", "PH", "SIZE.CLASS", "PRE.LENGTH")
+
+# Merge pre and post length data 
 Deploy.growth <- merge(x=Pre.length.mean, y=Deploy.length.mean, by.x="BAG", by.y="POUCH")
 Deploy.growth$Growth <- Deploy.growth$POST.LENGTH - Deploy.growth$PRE.LENGTH
 plot(subset(Deploy.growth, PH.x=="AMBIENT")$Growth ~ subset(Deploy.growth, PH.x=="AMBIENT")$HABITAT)

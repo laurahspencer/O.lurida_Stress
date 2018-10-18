@@ -123,15 +123,13 @@ pwr.anova.test(k=2 , n=8, f=0.78 , sig.level =.05 , power =NULL) #power=0.826
 pwr.anova.test(k=2 , n=8, f=0.78 , sig.level =.1 , power =NULL) #power=0.91
 
 
-
+# Jitter / boxplot with symbols for temperature 
 ggplot(Survival.set, aes(x=pH, y=survival.setters, col=pH)) + geom_boxplot() +
   geom_jitter(stat="identity", width = 0.2, size=6, aes(shape=Temperature)) +
   labs(title="Cumulative % Survival\nNew Larvae to Eyed Larvae") + xlab("Parental pH") + ylab("% Survival") +
   theme_bw(base_size = 20) + 
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, color="gray32"),  panel.border = element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), axis.line=element_line(colour="gray32"),  axis.title.x = element_text(color="gray32"), axis.title.y = element_text(color="gray32"), legend.position=c(0.8, 0.9), legend.background = element_rect(color = NULL, fill = NULL, linetype = NULL), legend.key = element_rect(size = 0.5, colour = "gray32"), legend.key.size = unit(1.5, 'lines'), legend.text = element_text(colour="gray32")) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, color="gray32"),  panel.border = element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), axis.line=element_line(colour="gray32"),  axis.title.x = element_text(color="gray32"), axis.title.y = element_text(color="gray32"), legend.position="bottom", legend.background = element_rect(color = NULL, fill = NULL, linetype = NULL),  legend.key.size = unit(1.5, 'lines'), legend.text = element_text(colour="gray32")) + 
   scale_color_manual(values=c('gray25', 'gray25'), guide=FALSE) + scale_shape_discrete(name  =NULL, breaks=c(6, 10), labels=c("Chilled", "Unchilled"))
-
-
 
 
 
