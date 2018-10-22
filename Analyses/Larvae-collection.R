@@ -1,16 +1,4 @@
-## Larval release plots, adapted from Katherine Silliman R code 
-## Oly 2017 project 
-
-library(ggplot2) #for plotting
-library(dplyr) #Data summary
-library(plotrix)#for SE calculation
-library("grid")#plotting
-library(gridExtra) #plotting
-library(scales) #plotting
-library(HH) #studentized residuals for lm/anova
-require(car)
-require(MASS)
-library(plyr)
+## Larval release plots and statistics, adapted from Katherine Silliman R code 
 
 rm(list=ls())         #start script by deleting all objects - clean slate 
 
@@ -50,6 +38,7 @@ print(larvae$error <- larvae$total.released - larvae$Tot.Larvae) #looks good, ju
 # K-10 Low = 111  
 # K-6 Ambient" = 117
 # K-6 Low" = 126
+aggregate(broodstock ~ Population, larvae, min)
 
 # add number of broodstock in each spawning group for normalization 
 larvae$broodstock <- larvae$Spawning.Group
@@ -96,59 +85,29 @@ all_total$Treatment <- gsub("6-Ambient", "Chilled, Ambient pH", all_total$Treatm
 all_total$Treatment <- gsub("10-Low", "Unchilled, Low pH", all_total$Treatment)
 all_total$Treatment <- gsub("6-Low", "Chilled, Low pH", all_total$Treatment)
 
-
 # create bar plot of daily larval release over time by treatment 
 all.release.bars <- ggplot(data=all_total, aes(x=Date, y=total.released, fill=Treatment)) + 
   geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Daily Larvae Released") + xlab("# Days in reproductive conditioning/spawning temperature (18C)") +
   ggtitle("Olympia oyster larval release by pH treatment and chilled/unchilled") + theme_bw(base_size = 20) +   
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=16), legend.text = element_text(size=16), axis.title = element_text(size=18, face = "bold"), panel.border=element_blank(), axis.line=element_line(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(), panel.background=element_blank(), legend.position = c(0.15, 0.85)) + scale_x_date(date_breaks = "1 week", date_labels = c( "93", "30", "37", "44", "51", "58", "65", "72", "79", "86")) + scale_fill_manual(values=c("skyblue3", "seagreen3", "orange1", "indianred2"))
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=16), legend.text = element_text(size=16), axis.title = element_text(size=18, face = "bold"), panel.border=element_blank(), axis.line=element_line(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(), panel.background=element_blank(), legend.position = c(0.15, 0.85)) + scale_x_date(date_breaks = "1 week", date_labels = c( "93", "30", "37", "44", "51", "58", "65", "72", "79", "86")) + scale_fill_manual(values=c("gray60", "lightsteelblue3", "gray40", "steelblue"))
 
 # add line plot of cumulative larval release by treatment to the above barplot 
 All.release <- all.release.bars + geom_line(data=all_total, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
-  scale_color_manual(values=c("skyblue3", "seagreen3", "orange1", "indianred2")) +
+  scale_color_manual(values=c("gray60", "lightsteelblue3", "gray40", "steelblue")) +
   scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
 
 jpeg(file="Results/Larval-release-plot.jpeg", width = 1000, height=650)
 All.release #call plots 
 dev.off()
 
-# Do the same for each chilled/unchilled group separately 
-all_total.6 <- subset(all_total, Treatment == "Chilled, Ambient pH" | Treatment == "Chilled, Low pH")
-all_total.6$Treatment <- as.factor(all_total.6$Treatment)
-release.bars.6 <- ggplot(data=subset(all_total.6, Date<="2017-06-22"), aes(x=Date, y=total.released, fill=Treatment)) + 
-  geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of Larvae Released") +
-  ggtitle("Olympia oyster larval release by pH treatment, chilled groups") + theme_bw(base_size = 16) +   
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=20), legend.text = element_text(size=20), axis.title = element_text(size=20, face = "bold"), axis.text = element_text(size=16))+
-  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
-  theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("skyblue3", "seagreen3"))
-release.6 <- release.bars.6 + geom_line(data=all_total.6, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
-  scale_color_manual(values=c("skyblue3", "seagreen3")) +
-  scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
-release.6
-
-# Unchilled treatments (all populations)
-all_total.10 <- subset(all_total, Treatment == "Unchilled, Ambient pH" | Treatment == "Unchilled, Low pH")
-all_total.10$Treatment <- as.factor(all_total.10$Treatment)
-release.bars.10 <- ggplot(data=subset(all_total.10, Date<="2017-06-22"), aes(x=Date, y=total.released, fill=Treatment)) + 
-  geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of Larvae Released") +
-  ggtitle("Olympia oyster larval release by pH treatment, unchilled groups") + theme_bw(base_size = 16) +   
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=20), legend.text = element_text(size=20), axis.title = element_text(size=20, face = "bold"), axis.text = element_text(size=16))+
-  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
-  theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2"))
-release.10 <- release.bars.10 + geom_line(data=all_total.10, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
-  scale_color_manual(values=c("orange1", "indianred2")) +
-  scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
-release.10
-
 # ----- Statistics 
 
 # Assess data distributions 
 
-# organize data ... ?
+# summarize data for each spawning bucket 
 spawning_group_total <- group_by(larvae, Spawning.Group, Population, Treatment, pH, Temperature) %>% mutate(cum.total=cumsum(total.released),cum.percap = cumsum(larvae.per.broodcm),CalDay = as.numeric(format(Date,"%j"))) %>% arrange(Date) %>% dplyr::select(Date,CalDay,Spawning.Group,Population,Treatment,pH,Temperature,total.released,larvae.per.broodcm,cum.total,cum.percap)
 
-# Generate summary table for each spawning bucket, pulling out key dates and summing/averaging larvae 
-
+# Summarize data for each treatment treatment, pulling out key dates and summing/averaging larvae 
 spawning_group_sum <- summarize(spawning_group_total, overall_Total = sum(total.released, na.rm = T), mean.larvae = mean(total.released,na.rm=T), se.larvae = std.error(total.released,na.rm=T), mean.percap = mean(larvae.per.broodcm,na.rm=T), total.percap = sum(larvae.per.broodcm,na.rm=T), maxday = as.numeric(CalDay[which.max(total.released)]), max = max(total.released), max.percap = max(larvae.per.broodcm), first.big = as.numeric(CalDay[which(total.released > 10000)[1]]), release.days = as.numeric(length(CalDay[total.released > 10000])))
 
 metrics <- list("total.released"=spawning_group_total$total.released, 
@@ -209,7 +168,36 @@ plot (x=spawning_group_sum$Treatment, y=spawning_group_sum$maxday, main="Calenda
 aggregate(maxday ~ Temperature, spawning_group_sum, mean) 
 152.1667 - 143.8333
 
-# ---------------------- extra plots for reference and fun 
+
+### ---------------------- extra plots for reference and fun 
+
+# Spawn plots for chilled/unchilled group separately 
+all_total.6 <- subset(all_total, Treatment == "Chilled, Ambient pH" | Treatment == "Chilled, Low pH")
+all_total.6$Treatment <- as.factor(all_total.6$Treatment)
+release.bars.6 <- ggplot(data=subset(all_total.6, Date<="2017-06-22"), aes(x=Date, y=total.released, fill=Treatment)) + 
+  geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of Larvae Released") +
+  ggtitle("Olympia oyster larval release by pH treatment, chilled groups") + theme_bw(base_size = 16) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=20), legend.text = element_text(size=20), axis.title = element_text(size=20, face = "bold"), axis.text = element_text(size=16))+
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
+  theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("skyblue3", "seagreen3"))
+release.6 <- release.bars.6 + geom_line(data=all_total.6, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
+  scale_color_manual(values=c("skyblue3", "seagreen3")) +
+  scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
+release.6
+
+# Unchilled treatments (all populations)
+all_total.10 <- subset(all_total, Treatment == "Unchilled, Ambient pH" | Treatment == "Unchilled, Low pH")
+all_total.10$Treatment <- as.factor(all_total.10$Treatment)
+release.bars.10 <- ggplot(data=subset(all_total.10, Date<="2017-06-22"), aes(x=Date, y=total.released, fill=Treatment)) + 
+  geom_bar(stat="identity",width=.5, position = position_dodge(width=2)) + ylab("Number of Larvae Released") +
+  ggtitle("Olympia oyster larval release by pH treatment, unchilled groups") + theme_bw(base_size = 16) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=20), legend.text = element_text(size=20), axis.title = element_text(size=20, face = "bold"), axis.text = element_text(size=16))+
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
+  theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2"))
+release.10 <- release.bars.10 + geom_line(data=all_total.10, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
+  scale_color_manual(values=c("orange1", "indianred2")) +
+  scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
+release.10
 
 #Calculate cumulative larvae released through time by spawning group (SN & NF groups had duplicate buckets)
 pop_total <- group_by(larvae, Group, Population, Treatment) %>% mutate(cum.total=cumsum(total.released),cum.percap = cumsum(larvae.per.broodcm),CalDay = as.numeric(format(Date,"%j"))) %>% arrange(Date) %>% dplyr::select(Date,CalDay,Group,Population,Treatment,total.released,larvae.per.broodcm,cum.total,cum.percap)

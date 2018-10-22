@@ -2,26 +2,8 @@
 
 rm(list=ls())         #start script by deleting all objects - clean slate 
 
-install.packages("ggplot2")
-library(ggplot2)
-
 Survival <- read.csv("Data/Survival-Data.csv", header=T, stringsAsFactors = F, na.strings = c("NA", "unknown")) #read in data 
-Survival[,c("Group", "Population", "Treatment", "Temperature", "pH")] <- lapply(Survival[,c("Group", "Population", "Treatment", "Temperature", "pH")], factor)
-str(Survival) #confirm formatting 
- 
-# Summary survival and stocking stats 
-# Pops <- c("NF", "NF","NF","NF", "SN", "SN", "SN", "SN", "HL","HL","HL","HL", "K","K","K","K", "SN", "SN", "SN", "SN")
-# Trts <- c("10 Ambient", "10 Low", "6 Ambient", "6 Low", "10 Ambient", "10 Low", "6 Ambient", "6 Low","10 Ambient", "10 Low", "6 Ambient", "6 Low","10 Ambient", "10 Low", "6 Ambient", "6 Low", "10 Low", "6 Low","10 Ambient", "6 Ambient")
-# Stocked <- as.numeric(c( 319277,211417,131675,391716,750793,660450,477403,532417,283858,310875,65667,255371, 324165,225873,353768, 179717, 800, 800, 800, 800))
-# Stocked.adj <- as.numeric(c(274464, 210907, 131005, 390136, 708904, 646529, 435238, 515788, 269869, 300065, 48929, 227711, 314438, 221487, 221487, 171998, 800, 800, 800, 800))
-# Setters <- as.numeric(c(3698, 2977, 11119, 11780, 29595, 4757, 11931, 6029,13917,19858, 2496, 10686, 13932,  2106, 22186, 9735, NA, NA, NA, NA))
-# Setters.stocked <- c()
-# Juvenile <- as.numeric(c(626,75,1503,670,52,34,124,192,1311,1091,501,834,246,113,356,334, 31,275,4,96))
-# Survival.summ <- cbind.data.frame(Pops,Trts,Stocked,Stocked.adj,Setters,Juvenile)
-# Survival.summ$Temp <- Survival.summ$Trts
-# Survival.summ$pH <- Survival.summ$Trts
-# Survival.summ$Temp <- factor(sub(" Ambient| Low", "", Survival.summ$Trts))
-# Survival.summ$pH <- factor(sub("10 |6 ", "", Survival.summ$pH))
+Survival[,c("Group", "Population", "Treatment", "Temperature", "pH")] <- lapply(Survival[,c("Group", "Population", "Treatment", "Temperature", "pH")], factor) #convert to factors 
 
 # Assess survival from stocking to near metamorphosis 224um ("setters"): 
 
@@ -35,7 +17,6 @@ Survival$Treatment <- as.factor(Survival$Treatment)
 # Calculate % survival 
 Survival$survival.setters <- Survival$Setters.stocked / Survival$Larvae.stocked.adjusted  #larvae stocked -> 224um 
 Survival$survival.postset <- Survival$Post.set / Survival$Setters.stocked #224um -> post-set 
-
 Survival.set <- droplevels(subset(Survival, survival.setters != "NA"))
 Survival.set$survival.setters <- Survival.set$survival.setters*100
 

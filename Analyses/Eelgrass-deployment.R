@@ -14,25 +14,54 @@ str(Deploy.data)
 aggregate(DEPLOYED ~ POPULATION + PH, Deploy.data, mean) #number deployed in each group
 
 # Compare survival between habitats overall
-glm.outplant.survival <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*PH*HABITAT, data=Deploy.data, binomial)
-anova(glm.outplant.survival, test="Chi")
-# BAY             0.0004879 ***
-# PH              0.0001019 ***
-# HABITAT         0.3754019        
-# BAY:PH          0.0054039 ** 
-# BAY:HABITAT     0.2103803    
-# PH:HABITAT      0.0662905 .  
-# BAY:PH:HABITAT  0.1243541    
+
+anova(glm.outplant1 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*PH*HABITAT, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant2 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*PH*HABITAT -  BAY:PH:HABITAT -  BAY:HABITAT, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant3 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*PH, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant4 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY*POPULATION*PH, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant5 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH*(BAY+POPULATION), data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant6 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant7 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant8 <- glm(cbind(SURVIVED, DEPLOYED) ~ HABITAT, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant9 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant10 <- glm(cbind(SURVIVED, DEPLOYED) ~ DEPLOYED, data=Deploy.data, binomial), test="Chi")
+
+AIC(glm.outplant1, glm.outplant2, glm.outplant3, glm.outplant4, glm.outplant5, glm.outplant6, glm.outplant7, glm.outplant8, glm.outplant9, glm.outplant10)
+
+anova(glm.outplant5, test="Chi")
+summary(glm.outplant5)
+
+#                 Df  Deviance  Resid. Df   Resid. Dev  Pr(>Chi)    
+#   NULL                            112     314.09              
+#   BAY            3   17.782       109     296.30 0.0004879 ***
+#   POPULATION     3   45.796       106     250.51 6.266e-10 ***
+#   PH             1   10.599       105     239.91 0.0011317 ** 
+#   BAY:PH         3   14.659       102     225.25 0.0021321 ** 
+#   POPULATION:PH  3   24.986        99     200.26 1.555e-05 ***
+
+
+Deploy.data$perc.surv <- Deploy.data$SURVIVED/Deploy.data$DEPLOYED
+aggregate(perc.surv ~ PH + SIZE, data=Deploy.data, mean, na.rm=TRUE)
+aggregate(perc.surv ~ PH + SIZE, data=Deploy.data, var, na.rm=TRUE)
+aggregate(perc.surv ~ POPULATION + PH + SIZE, data=Deploy.data, mean, na.rm=TRUE)
 
 aggregate((SURVIVED/DEPLOYED) ~ PH, Deploy.data, mean, na.rm=TRUE)
-# PH (SURVIVED/DEPLOYED)
-# A   0.294
-# L   0.438
+#   PH      SIZE      (SURVIVED/DEPLOYED)
+#  Ambient    L           0.3284651
+#      Low    L           0.4426619
+#  Ambient    S           0.2538462
+#      Low    S           0.4305556
 
-aggregate((SURVIVED/DEPLOYED) ~ PH, subset(Deploy.data, HABITAT != "NA" & POPULATION!="SSF2"), mean, na.rm=TRUE)
-# PH (SURVIVED/DEPLOYED)
-# A   0.32
-# L   0.51
+aggregate((SURVIVED/DEPLOYED) ~ PH + POPULATION, subset(Deploy.data, HABITAT != "NA"), mean, na.rm=TRUE)
+#PH POPULATION (SURVIVED/DEPLOYED)
+# Ambient         FB          0.266
+#     Low         FB          0.616
+# Ambient         HC          0.300
+#     Low         HC          0.337
+# Ambient       SSF1          0.376
+#     Low       SSF1          0.577
+# Ambient       SSF2          0.197
+#     Low       SSF2          0.044
 
 aggregate(DEPLOYED ~ PH, Deploy.data, sum, na.rm=TRUE)
 aggregate(SURVIVED ~ PH, Deploy.data, sum, na.rm=TRUE)
@@ -58,37 +87,24 @@ aggregate((SURVIVED/DEPLOYED) ~ BAY, Deploy.data, mean, na.rm=TRUE)
 # PG   0.485
 # SK   0.317
 
-aggregate(DEPLOYED ~ BAY+HABITAT, Deploy.data, sum, na.rm=TRUE) 
-# BAY HABITAT DEPLOYED
-# CI  B      180
-# FB  B      160
-# PG  B      166
-# SK  B      164
-# CI  E      149
-# FB  E      180
-# PG  E      144
-# SK  E      178
-
-plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$POP.PH.HAB, main="All Bays")
-
-# Survival, each population and habitat in each outplant bay 
-plot(subset(Deploy.data, BAY=="FB")$SURVIVED/subset(Deploy.data, BAY=="FB")$DEPLOYED ~ subset(Deploy.data, BAY=="FB")$POP.PH.HAB, main="Fidalgo Bay")
-plot(subset(Deploy.data, BAY=="PG")$SURVIVED/subset(Deploy.data, BAY=="PG")$DEPLOYED ~ subset(Deploy.data, BAY=="PG")$POP.PH.HAB, main="Port Gamble")
-plot(subset(Deploy.data, BAY=="CI")$SURVIVED/subset(Deploy.data, BAY=="CI")$DEPLOYED ~ subset(Deploy.data, BAY=="CI")$POP.PH.HAB, main="Case Inlet")
-plot(subset(Deploy.data, BAY=="SK")$SURVIVED/subset(Deploy.data, BAY=="SK")$DEPLOYED ~ subset(Deploy.data, BAY=="SK")$POP.PH.HAB, main="Skokomish")
-
-
-plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$BAY, xlab="Bay", ylab="% Survival", main="% Survival by Bay") #YES sign. difference 
-plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$PH, xlab="Parental PH Exposure", ylab="% Survival", main="% Survival by Parental pH Exposure") #YES sign. difference, low pH history higher survival 
-plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$HABITAT, xlab="Habitat", ylab="% Survival", main="% Survival by Habitat") #NO sign. difference, but median survival higher in eelgrass 
-plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$POPULATION, xlab="Population", ylab="% Survival", main="% Survival by Population") 
+aggregate(DEPLOYED ~ POPULATION+PH, Deploy.data, mean, na.rm=TRUE) 
+# POPULATION  PH DEPLOYED
+#   FB  Ambient      240
+#   HC  Ambient      240
+# SSF1  Ambient       85
+# SSF2  Ambient      112
+#   FB     Low      257
+#   HC     Low      240
+# SSF1     Low       77
+# SSF2     Low       90
+14*8
+11*8
 
 # Colored plot of survival between habitat, parental pH exposure, all bays combined 
 plot(Deploy.data$SURVIVED/Deploy.data$DEPLOYED ~ Deploy.data$HAB.PH, main="Survival by Parental Exposure & Habitat, all bays", xlab="Parent PH, Habitat", ylab="% Survival", size=I(4), col=c("skyblue3", "skyblue3", "seagreen3", "seagreen3"), cex.lab=1.3, cex.main=1.5, cex.axis=1.3)
 
 # same plot, w/o SS-F3 group (since none really survived)
 plot(subset(Deploy.data, POPULATION!="SSF2")$SURVIVED/subset(Deploy.data, POPULATION!="SSF2")$DEPLOYED ~ subset(Deploy.data, POPULATION!="SSF2")$HAB.PH, main="Survival by Parental Exposure & Habitat, all bays", xlab="Parent PH, Habitat", ylab="% Survival", size=I(4), col=c("skyblue3", "skyblue3", "seagreen3", "seagreen3"), cex.lab=1.3, cex.main=1.5, cex.axis=1.3)
-
 
 Deploy.data$PH <- gsub("A", "Ambient", Deploy.data$PH)
 Deploy.data$PH <- gsub("L", "Low", Deploy.data$PH)
@@ -100,7 +116,23 @@ Deploy.data$HAB.PH <- gsub("AMB.BARE", "AMB.UNVEG", Deploy.data$HAB.PH)
 Deploy.data$HAB.PH <- gsub("LOW.BARE", "LOW.UNVEG", Deploy.data$HAB.PH)
 Deploy.data$HAB.PH <- as.factor(Deploy.data$HAB.PH)
 
-library(ggplot2)
+# survival by population and pH - did survival correlate with parental pH consistently across populations? 
+deploy.col <- c("gray60", "lightsteelblue3")[as.numeric(Deploy.data$PH)]
+names(deploy.col) <- Deploy.data$PH
+
+ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), color=PH)) + 
+  geom_jitter(width = 0.3, size=5, aes(shape=PH)) +
+  labs(title="Percent survival, population and pH",y=expression("Percent Survival")) + 
+  theme_bw(base_size = 14) + xlab("Population") +
+  theme(plot.title = element_text(face = 'bold',size = 18, hjust = 0), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col)
+
+ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) +
+  geom_boxplot() +
+  labs(title="Percent survival by pH within population",y=expression("Percent Survival")) + 
+  theme_bw(base_size = 14) + xlab("Population") +
+  theme(plot.title = element_text(face = 'bold',size = 18, hjust = 0), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_fill_manual(values = deploy.col) 
+
+
 ggplot(subset(Deploy.data, HABITAT != "NA" & HAB.PH != "NA"), aes(x=HAB.PH, y=100*(SURVIVED/DEPLOYED), fill=PH, colour=HABITAT)) + 
   geom_boxplot() +
   labs(title="Survival by Parental Exposure & Habitat", y=expression("% Survival")) + 
@@ -125,14 +157,6 @@ ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=HABITAT, y= 100*(SURVIVED/DEPLO
   theme(plot.title = element_text(face = 'bold',size = 18, hjust = 0), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +  geom_vline(xintercept = 1.5, colour="gray")
 
 
-# survival by population and pH - did survival correlate with parental pH consistently across populations? 
-ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), colour=PH)) + 
-  geom_jitter(width = 0.4, size=5, aes(shape=PH)) +
-  labs(title="Percent survival, population and pH",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 14) + xlab("Population") +
-  theme(plot.title = element_text(face = 'bold',size = 18, hjust = 0), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray")
-
-
 # survival by population & Bay - did populations do better on their home turf? 
 ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), colour=BAY)) + 
   geom_jitter(width = 0.4, size=4, aes(shape=PH)) +
@@ -151,11 +175,6 @@ ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=BAY, y= 100*(SURVIVED/DEPLOYED)
 
 
 
-plot_ly(data = subset(Deploy.data, HAB.PH !="NA"), x = ~HAB.PH, y = ~100*(SURVIVED/DEPLOYED), type="scatter", mode="markers", color=~BAY, colors = c("red", "orange", "green", "black"), hovertext=~POUCH) %>%  #generate plotly plot
-  layout(title="Survival by parental pH, habitat",
-         yaxis = list(title = 'Survived'),
-         xaxis = list(title = 'Treatment'),
-         legend = list(x=100, y=.9))
 
 # Survival difference between habitats in ambient parent groups 
 anova(glm(cbind(SURVIVED, DEPLOYED) ~ BAY+HABITAT, data=subset(Deploy.data, PH=="A"), binomial), test="Chi") #ambient parents, p=0.06018

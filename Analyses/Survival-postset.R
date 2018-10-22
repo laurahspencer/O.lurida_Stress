@@ -83,8 +83,12 @@ anova(test.postset12)
 
 ## RESULT: Best fit model includes pH interaction with Mean larvae stocked in culture tanks, Population and Temperature. Only highly significant covariate is Mean.stocked, Population and pH:Mean.stocekd covariates trend as sign.  This indicates that the primary factor was tank density from new->eyed larvae. This is interesting, as density did not affect survival to 224um, indicating that there may have been density-dependent stress or competition for resources, that only manifested during the metamorphosis phase. 
 
-# Density vary by pH treatment? 
-anova(lm(Mean.stocked ~ Temperature*pH, data=Survival.post)) #no 
+# Mean stocking density vary by temp & pH treatment? 
+shapiro.test(Survival.post$Mean.stocked) #normal OK
+hist(Survival.post$Mean.stocked) #normal OK
+bartlett.test(Survival.post$Mean.stocked ~ Survival.post$pH) #variance OK
+bartlett.test(Survival.post$Mean.stocked ~ Survival.post$Temperature) #variance OK
+anova(lm(Mean.stocked ~ Temperature*pH, data=Survival.post)) #no sign. 
 
 # survival postset ~ stocking density during larval phase 
 plot(x=Survival.post$Mean.stocked, y=log(Survival.post$survival.postset), bg="black", col=c("gray32", "steelblue3")[as.numeric(Survival.post$pH)], pch=c(16,17)[as.numeric(Survival.post$Temperature)], cex=2, main="% postset surv. ~ mean stocking density\nColor=pH", xlab="mean larval tank density", ylab="% 224um Survival to postset")
@@ -93,7 +97,6 @@ text(x=Survival.post$Mean.stocke+2000,
      y=log(Survival.post$survival.postset)-.1, col="gray30", labels=Survival.post$Population, xpd=T, cex=0.8)
 legend(70000, 3, legend=c("6-Low", "10-Low", "6-Amb", "10-Amb"),
        col=c("steelblue3", "steelblue3", "gray32", "gray32"), pch=c(16, 17, 16, 17), cex=1)
-
 
 # strong evidence for stocking density effect on survival from 224um->post-set
 

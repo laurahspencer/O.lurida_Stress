@@ -2,11 +2,6 @@
 
 # Resource: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
 # Resource: log-linear glm to compare multidimentional contingency tables - not used in this analysis. 
-
-library(gplots)       #load packages 
-library(corrplot)
-library(cowplot)
-
 rm(list=ls())         #start script by deleting all objects - clean slate 
 
 # Read in histology data. 

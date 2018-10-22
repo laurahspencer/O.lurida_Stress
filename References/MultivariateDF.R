@@ -1,5 +1,7 @@
 # create master summary statistic df (for multivariate analysis)
 
+View(Oly.size.summary3)
+
 # Copy dataframes so I don't mess up the other ones 
 Oly.size.summary3.c <- Oly.size.summary3
 Survival.post.c <- Survival.post
@@ -87,3 +89,7 @@ master.list <- setNames(master.list, c("Population", "Temperature", "PH", "GROUP
 # Save resulting dataframe as .csv 
 write.csv(master.list, file="Analyses/multivariate-summary-table.csv")
 # NOTE:  If wanting to include the SN mini-experiment, use the file called multivariate-summary-table-adj.csv (manually edited version)
+
+write.csv(master, file="Analyses/master-summary-table.csv")
+View(master.list)
+aggregate(Days.Stocked ~ Population+PH, master.list, sum)

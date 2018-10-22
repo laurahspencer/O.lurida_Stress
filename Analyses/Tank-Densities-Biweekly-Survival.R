@@ -6,7 +6,7 @@ Bucket.Densities <- read.csv("Data/Bucket-Densities-revised.csv", header = F, st
 colnames(Bucket.Densities) <- Bucket.Densities[2,]
 Bucket.Densities <- Bucket.Densities[-1:-2,]
 
-# Groups with 2 larval buckets initially:  
+# NOTES regarding groups with 2 larval buckets initially:  
 # NF10-Low, started new bucket on 5/24 
 # NF10-Ambient, started new bucket on 5/25
 # NF6-Low, started new bucket on 5/25
@@ -103,16 +103,16 @@ ggplot(subset(Bucket.Densities.wide, survival<1.5), aes(x=Treatment, y= survival
   theme_bw(base_size = 16) + xlab("Population") +
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
 
-
-# Test differences in survival between screening dates (counted & restocked 2x weekly) 
+# Inspect differences in survival between screening dates (counted & restocked 2x weekly) 
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), mean)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), median)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), var)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), sd)
 # summary stats indicate likely no difference 
 
-# test using binomial glm 
-anova(glm(cbind(actual, dead) ~ Temperature+pH, data=subset(Bucket.Densities.wide, dead>0), binomial), test="Chi") #Sign., but do we trust this?  Not sure ... 
+# test using beta regression with proportion of live 
+summary(beta.biweekly <- betareg(survival ~ Temperature/pH, data=subset(Bucket.Densities.wide, dead>0)))
+plot(beta.biweekly$residuals) #no diff. 
 
 # Test using aov on square-root arcsine transformed survival % data 
 hist(asin(sqrt(subset(Bucket.Densities.wide, (survival!= "NA" & survival <= 1))$survival))) # looks normal 
