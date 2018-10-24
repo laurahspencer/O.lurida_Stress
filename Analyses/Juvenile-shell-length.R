@@ -69,7 +69,7 @@ summary(glm.l1 <- glm(value~  log(stocked),family=Gamma(link="log"), data=subset
 summary(glm.l2 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
 summary(glm.l3 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6 & value !=2)))
 summary(glm.l4 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l5 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6 & value !=2)))
+summary(glm.l5 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6 & value !=2))) 
 summary(glm.l6 <- glmer(value~  log(stocked) +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
 summary(glm.l7 <- glmer(value~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
 summary(glm.l8 <- glmer(value~  log(stocked)*PH+(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
@@ -100,6 +100,17 @@ kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="HL" & value !=2)) 
 kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="K")) #diff
 kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="NF")) #diff 
 kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="SN")) #not diff 
+
+summary(subset(Oly.size.long2, COHORT=="HL" & value !=2 & PH=="AMBIENT" & TEMP == 6)$value)
+summary(subset(Oly.size.long2, COHORT=="HL" & value !=2 & PH=="LOW")$value)
+summary(subset(Oly.size.long2, COHORT=="HL" & PH=="AMBIENT")$value)
+summary(subset(Oly.size.long2, COHORT=="HL" & PH=="LOW")$value)
+summary(subset(Oly.size.long2, COHORT=="NF" & PH=="AMBIENT"& PH=="AMBIENT")$value)
+summary(subset(Oly.size.long2, COHORT=="NF" & PH=="LOW")$value)
+summary(subset(Oly.size.long2, COHORT=="K" & PH=="AMBIENT")$value)
+summary(subset(Oly.size.long2, COHORT=="K" & PH=="LOW")$value)
+
+
 
 # plots length data as distributions 
 

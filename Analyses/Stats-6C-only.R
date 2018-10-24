@@ -4,7 +4,7 @@
 
 plot(subset(Bucket.Densities.long, Count=="density" & Temperature==6)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature==6)$Treatment) #boxplot to inspect 
 kruskal.test(subset(Bucket.Densities.long, Count=="density" & Temperature==6)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature==6)$pH) # p=0.5352  <-- no pH difference 
-aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), mean)  
+aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), mean)  
 
 ### ------ biweekly bucket cleaning survival 
 # Test using aov on square-root arcsine transformed survival % data 
@@ -47,8 +47,8 @@ summary(test.setters5 <- lm(survival.setters ~ Days.Stocked, data=subset(Surviva
 summary(test.setters6 <- lm(survival.setters ~ Larvae.stocked.adjusted+pH, data=subset(Survival.set, Temperature==6))) 
 
 AIC(test.setters1, test.setters2, test.setters3, test.setters4, test.setters5, test.setters6) 
-summary(test.setters3) # Model p-value=0.2026, Adjusted R-squared=0.5127 AIC=65.31575
-anova(test.setters3) # 1 fewer covariates, best R-squared and total p-value. Most parsimonious.  
+summary(test.setters3) # Model p-value=0.2027, Adjusted R-squared=0.5231 AIC=34.54893
+anova(test.setters3) # 
 
 # Df  Sum Sq Mean Sq F value Pr(>F)
 # Population  3 21.6257  7.2086  2.7558 0.2136
