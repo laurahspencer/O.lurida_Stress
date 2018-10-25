@@ -26,11 +26,18 @@ write.csv(file="Data/Oly.10-month-size.summary.csv", x=Oly.size.summary3)
 
 # Remove the mini-experiment data, very small stocking density and only 1 spawning group 
 Oly.size.summary4 <- filter(Oly.size.summary3, !grepl("Exp",TREATMENT))
-Oly.size.summary4 <- filter(Oly.size.summary4, !grepl("NF10",Group))
+#Oly.size.summary4 <- filter(Oly.size.summary4, !grepl("NF10",Group))
 
 # Inspect length by stocking density 
-plot(x=Oly.size.summary4$stocked, y=Oly.size.summary4$Mean, main="All Pops,\nmean length ~ stocking density\ncolor = pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
-text(x=Oly.size.summary4$stocked, y=Oly.size.summary4$Mean, labels =Oly.size.summary4$PH)
+plot(x=log(Oly.size.summary4$stocked), y=Oly.size.summary4$Mean, main="All Pops,\nmean length ~ stocking density\ncolor = pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
+text(x=log(Oly.size.summary4$stocked)+.15, y=Oly.size.summary4$Mean+.15, labels =Oly.size.summary4$COHORT)
+
+# Fidalgo Bay only 
+plot(x=subset(Oly.size.summary4, COHORT=="NF")$stocked, y=subset(Oly.size.summary4, COHORT=="NF")$Mean, main="Fidalgo Bay,\nmean length ~ stocking density\nred = low pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
+# Hood Canal only 
+plot(x=subset(Oly.size.summary4, COHORT=="HL")$stocked, y=subset(Oly.size.summary4, COHORT=="HL")$Mean, main="Hood Canal,\nmean length ~ stocking density\nred = low pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
+plot(x=subset(Oly.size.summary4, COHORT=="SN")$stocked, y=subset(Oly.size.summary4, COHORT=="SN")$Mean, main="South Sound F1,\nmean length ~ stocking density\nred = low pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
+plot(x=subset(Oly.size.summary4, COHORT=="K")$stocked, y=subset(Oly.size.summary4, COHORT=="K")$Mean, main="South Sound F2,\nmean length ~ stocking density\nred = low pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
 
 # Mean stocking density vary by temp & pH treatment? 
 shapiro.test(log(Oly.size.summary4$stocked))  #log-normal OK
@@ -43,43 +50,65 @@ anova(lm(log(stocked) ~ COHORT/PH, data=Oly.size.summary4)) #not by temp & pH w/
 # merge stocking density with full dataframe to include in stats 
 Oly.size.long2 <- merge(x=Oly.size.long, y=stock.dens, by.x="GROUP", by.y="groups", all.x=T, all.y=F)
 
-# Remove groups with poor survival / low stocking density all 10C groups and mini-exp. groups 
-Oly.size.long2 <- filter(Oly.size.long2, !grepl("Exp",GROUP))
-Oly.size.long2 <- filter(Oly.size.long2, !grepl("NF10",GROUP))
+# Remove mini-exp. groups 
+#Oly.size.long2 <- filter(Oly.size.long2, !grepl("Exp",GROUP))
+
+# I counted way more HL6 oysters than the other groups; pull a random subset to include analyses so they don't overpower the other groups in models 
+HL6A.sub <- subset(Oly.size.long2, GROUP=="HL6-AMB" & value!="NA")
+HL6L.sub <- subset(Oly.size.long2, GROUP=="HL6-LOW" & value!="NA")
+HL6A.sub <- HL6A.sub[sample(nrow(HL6A.sub), 330), ]
+HL6L.sub <- HL6L.sub[sample(nrow(HL6L.sub), 330), ]
+
+Oly.size.long3 <- subset(Oly.size.long2, GROUP != "HL6-AMB" & GROUP != "HL6-LOW" & value !="NA")
+Oly.size.long3 <- rbind(Oly.size.long3, HL6A.sub, HL6L.sub)
+
+nrow(subset(Oly.size.long2, GROUP == "HL6-AMB")) == nrow(subset(Oly.size.long3, GROUP == "HL6-AMB"))
+nrow(subset(Oly.size.long2, GROUP == "HL6-LOW")) == nrow(subset(Oly.size.long3, GROUP == "HL6-LOW"))
 
 #Assess distribution of length data 
 hist(Oly.size.long2$value) #right skewed 
-shapiro.test(Oly.size.long2$value) #not normal 
+shapiro.test(Oly.size.long3$value) #not normal 
 
 # plot length histogram & overlay normal distribution - definitely not normal. Looks like gamma distribution. 
-hist(subset(Oly.size.long2, value != "NA")$value,  breaks=0:26, col="green", main="")
-lines(seq(0,26,0.1), length(subset(Oly.size.long2, value != "NA")$value)*dnorm(seq(0,26,.1), mean(subset(Oly.size.long2, value != "NA")$value), sqrt(var(subset(Oly.size.long2, value != "NA")$value))))
+hist(subset(Oly.size.long3, value != "NA")$value,  breaks=0:26, col="green", main="")
+lines(seq(0,26,0.1), length(subset(Oly.size.long3, value != "NA")$value)*dnorm(seq(0,26,.1), mean(subset(Oly.size.long3, value != "NA")$value), sqrt(var(subset(Oly.size.long3, value != "NA")$value))))
 
 # replot histogram, and overlay gamma probability distribution. First calculate distribution's rate and shape (rate = mean/var, shape = rate*mean). Also need max length to assign bins and gamma dist. range 
-length.rate <- mean(subset(Oly.size.long2, value != "NA")$value) / var(subset(Oly.size.long2, value != "NA")$value)
-length.shape <- length.rate*mean(subset(Oly.size.long2, value != "NA")$value)
-max(subset(Oly.size.long2, value != "NA")$value) #need max for hist. bins 
-hist(subset(Oly.size.long2, value != "NA")$value, breaks=-0.5:24.5, col="green", main="") #plot histogram
-lines(seq(0.01,25,0.1), length(subset(Oly.size.long2, value != "NA")$value)*dgamma(seq(0.01,25,0.1),length.shape,length.rate)) #overlay gamma distribution density function 
+length.rate <- mean(subset(Oly.size.long3, value != "NA")$value) / var(subset(Oly.size.long3, value != "NA")$value)
+length.shape <- length.rate*mean(subset(Oly.size.long3, value != "NA")$value)
+max(subset(Oly.size.long3, value != "NA")$value) #need max for hist. bins 
+hist(subset(Oly.size.long3, value != "NA")$value, breaks=-0.5:24.5, col="green", main="") #plot histogram
+lines(seq(0.01,25,0.1), length(subset(Oly.size.long3, value != "NA")$value)*dgamma(seq(0.01,25,0.1),length.shape,length.rate)) #overlay gamma distribution density function 
 
 # conclusion: gamma distribution fits length data adequately 
 
 # Fit glms with gamma errors, compare with AIC. Use glm() when cohort not included; use glmer to include cohort as random effect. 
-summary(glm.l1 <- glm(value~  log(stocked),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l2 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l3 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6 & value !=2)))
-summary(glm.l4 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l5 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6 & value !=2))) 
-summary(glm.l6 <- glmer(value~  log(stocked) +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l7 <- glmer(value~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
-summary(glm.l8 <- glmer(value~  log(stocked)*PH+(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long2, value != "NA" & TEMP==6)))
+summary(glm.l1 <- glm(value~  log(stocked),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
+summary(glm.l2 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
+summary(glm.l3 <- glm(value~  PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6 & value !=2)))
+summary(glm.l4 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
+summary(glm.l5 <- glmer(value~  log(stocked)+PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6 & value !=2))) 
+summary(glm.l6 <- glmer(value~  log(stocked) +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
+summary(glm.l7 <- glmer(value~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
+summary(glm.l8 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & TEMP==6)))
 
 AIC(glm.l1,glm.l2,glm.l4,glm.l6,glm.l7,glm.l8) #lowest AIC = glm.l4 & glm.l7
 summary(glm.l7) # length ~ PH + (1 | COHORT)
 summary(glm.l4) # length ~ log(stocked) + PH + (1 | COHORT), good to see that stocked isn't sign. with population as random effect, but pH still is. 
-exp(-0.22256) # coefficient == 0.80
+exp(-0.206998) # coefficient == 0.809
 
-### ------ juvenile length data - sign. smaller oysters from low ph groups, ~20% smaller. No diff. in stocking btn groups. 
+summary(glm.l7 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & GROUP != "HL6-AMB" & GROUP!="HL6-LOW")))
+exp(-.086) #== 0.906
+summary(glm.l7 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA")))
+exp(-0.12493) #== 0.852
+
+# Inspect each population separately - are there sign. differences in PH given variations in stocking densities? 
+summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="NF"))) 
+summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="HL"))) 
+summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="SN"))) 
+summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="K"))) 
+
+### ------ all groups combined, juvenile length data - sign. smaller oysters from low ph groups, ~20% smaller. No sign. diff. in stocking btn groups. 
 
 Anova(glm.l7) # Use `car` package for Chisq test on analysis of deviance table 
 Anova(glm.l4) # Use `car` package for Chisq test on analysis of deviance table 
@@ -92,25 +121,23 @@ exp(glm.l.ci[2,]) #2.5x
 
 ### Kruskal wallis tests - nonparametric rank-order test 
 
-kruskal.test(value ~ PH, data=Oly.size.long2) # ~0 
-kruskal.test(value ~ COHORT, data=Oly.size.long2) # ~0 
+kruskal.test(value ~ PH, data=Oly.size.long3) # ~0 
+kruskal.test(value ~ COHORT, data=Oly.size.long3) # ~0 
 # KW test for each cohort 
-kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="HL")) #diff
-kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="HL" & value !=2)) #diff, even without the 2.0 mm data points 
-kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="K")) #diff
-kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="NF")) #diff 
-kruskal.test(value ~ PH, data=subset(Oly.size.long2, COHORT=="SN")) #not diff 
+kruskal.test(value ~ PH, data=subset(Oly.size.long3, COHORT=="HL")) #diff
+kruskal.test(value ~ PH, data=subset(Oly.size.long3, COHORT=="HL" & value !=2)) #diff, even without the 2.0 mm data points 
+kruskal.test(value ~ PH, data=subset(Oly.size.long3, COHORT=="K")) #diff
+kruskal.test(value ~ PH, data=subset(Oly.size.long3, COHORT=="NF")) #diff 
+kruskal.test(value ~ PH, data=subset(Oly.size.long3, COHORT=="SN")) #diff 
 
-summary(subset(Oly.size.long2, COHORT=="HL" & value !=2 & PH=="AMBIENT" & TEMP == 6)$value)
-summary(subset(Oly.size.long2, COHORT=="HL" & value !=2 & PH=="LOW")$value)
-summary(subset(Oly.size.long2, COHORT=="HL" & PH=="AMBIENT")$value)
-summary(subset(Oly.size.long2, COHORT=="HL" & PH=="LOW")$value)
-summary(subset(Oly.size.long2, COHORT=="NF" & PH=="AMBIENT"& PH=="AMBIENT")$value)
-summary(subset(Oly.size.long2, COHORT=="NF" & PH=="LOW")$value)
-summary(subset(Oly.size.long2, COHORT=="K" & PH=="AMBIENT")$value)
-summary(subset(Oly.size.long2, COHORT=="K" & PH=="LOW")$value)
-
-
+summary(subset(Oly.size.long3, COHORT=="HL" & value !=2 & PH=="AMBIENT" & TEMP == 6)$value)
+summary(subset(Oly.size.long3, COHORT=="HL" & value !=2 & PH=="LOW")$value)
+summary(subset(Oly.size.long3, COHORT=="HL" & PH=="AMBIENT")$value)
+summary(subset(Oly.size.long3, COHORT=="HL" & PH=="LOW")$value)
+summary(subset(Oly.size.long3, COHORT=="NF" & PH=="AMBIENT"& PH=="AMBIENT")$value)
+summary(subset(Oly.size.long3, COHORT=="NF" & PH=="LOW")$value)
+summary(subset(Oly.size.long3, COHORT=="K" & PH=="AMBIENT")$value)
+summary(subset(Oly.size.long3, COHORT=="K" & PH=="LOW")$value)
 
 # plots length data as distributions 
 
