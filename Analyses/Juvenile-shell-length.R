@@ -30,7 +30,7 @@ Oly.size.summary4 <- filter(Oly.size.summary3, !grepl("Exp",TREATMENT))
 
 # Inspect length by stocking density 
 plot(x=log(Oly.size.summary4$stocked), y=Oly.size.summary4$Mean, main="All Pops,\nmean length ~ stocking density\ncolor = pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
-text(x=log(Oly.size.summary4$stocked)+.15, y=Oly.size.summary4$Mean+.15, labels =Oly.size.summary4$COHORT)
+text(x=log(Oly.size.summary4$stocked)+.1, y=Oly.size.summary4$Mean+.1, labels =Oly.size.summary4$COHORT)
 
 # Fidalgo Bay only 
 plot(x=subset(Oly.size.summary4, COHORT=="NF")$stocked, y=subset(Oly.size.summary4, COHORT=="NF")$Mean, main="Fidalgo Bay,\nmean length ~ stocking density\nred = low pH", xlab="Stocking Density", ylab = "Mean Length (mm)", col=Oly.size.summary4$PH, pch=19, cex=2)
@@ -95,29 +95,35 @@ summary(glm.l8 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=sub
 AIC(glm.l1,glm.l2,glm.l4,glm.l6,glm.l7,glm.l8) #lowest AIC = glm.l4 & glm.l7
 summary(glm.l7) # length ~ PH + (1 | COHORT)
 summary(glm.l4) # length ~ log(stocked) + PH + (1 | COHORT), good to see that stocked isn't sign. with population as random effect, but pH still is. 
-exp(-0.206998) # coefficient == 0.809
+exp(-0.08615) # coefficient == 0.809
 
-summary(glm.l7 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & GROUP != "HL6-AMB" & GROUP!="HL6-LOW")))
+summary(glm.l9 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & GROUP != "HL6-AMB" & GROUP!="HL6-LOW")))
 exp(-.086) #== 0.906
-summary(glm.l7 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA")))
+summary(glm.l10 <- glmer(value ~  PH +(1|COHORT),family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA")))
 exp(-0.12493) #== 0.852
 
 # Inspect each population separately - are there sign. differences in PH given variations in stocking densities? 
-summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="NF"))) 
-summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="HL"))) 
-summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="SN"))) 
-summary(glm.l5 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="K"))) 
+summary(glm.l11 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="NF"))) 
+summary(glm.l12 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="HL"))) 
+summary(glm.l13 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="SN"))) 
+summary(glm.l14 <- glm(value~  log(stocked)*PH,family=Gamma(link="log"), data=subset(Oly.size.long3, value != "NA" & COHORT=="K"))) 
 
 ### ------ all groups combined, juvenile length data - sign. smaller oysters from low ph groups, ~20% smaller. No sign. diff. in stocking btn groups. 
 
 Anova(glm.l7) # Use `car` package for Chisq test on analysis of deviance table 
 Anova(glm.l4) # Use `car` package for Chisq test on analysis of deviance table 
 
+# compare bag densities between PH groups using summary dataframe
+shapiro.test(log(subset(Oly.size.summary4, TEMP==6)$stocked))
+anova(lm(log(stocked) ~ PH, data=subset(Oly.size.summary4, TEMP==6)))
+
 # Make table of estimates (exp. transformed) with 95% CI
 se <- sqrt(diag(vcov(glm.l7)))
 print(glm.l.ci <- exp(cbind(Est = fixef(glm.l7), LL = fixef(glm.l7) - 1.96*se, UL = fixef(glm.l7) + 1.96*se)))
 1-glm.l.ci[2,] # % smaller due to low pH 
 exp(glm.l.ci[2,]) #2.5x 
+
+plot(glm.l7) #plot residuals 
 
 ### Kruskal wallis tests - nonparametric rank-order test 
 
@@ -149,7 +155,7 @@ Oly.size.long$TREAT <- as.factor(gsub("-Exp", "", Oly.size.long$TREAT))
 levels(Oly.size.long$TREAT) #confirm only 4 treatment levels
 
 # All temps combined  
-ggdensity(data=subset(Oly.size.long2,  value!="NA"), x = "value",
+ggdensity(data=subset(Oly.size.long3,  value!="NA"), x = "value",
           add = "mean", rug = TRUE,
           color = "PH", fill = "PH",  palette = colors2) +
   labs(title="Shell length (mm)\n @ ~10months",x="shell length (mm)") +
@@ -159,6 +165,13 @@ ggdensity(data=subset(Oly.size.long2,  value!="NA"), x = "value",
   font("xy.text", size = 18) +
   font("legend.title", size=18) +
   font("legend.text", size=18)
+
+ggplot(Oly.size.long3, aes(x = value)) +
+geom_histogram(aes(color = PH, fill = PH),
+                   alpha = 0.4, position = "identity") +
+  scale_fill_manual(values = colors2) +
+  scale_color_manual(values = colors2)
+
 
 # Each population separately 
 png("Results/NF-9month-Length.png", width = 700, height = 500)
