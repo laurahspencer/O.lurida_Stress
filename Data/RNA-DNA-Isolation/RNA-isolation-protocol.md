@@ -1,7 +1,7 @@
 ### RNA Isolation and Qubit
 ## RNA Isolation (2.5-3 hrs for 9 samples)
 
-This protocol was used for larval RNA isolation. It follows the protocol for crab hemolymph isolation (https://github.com/grace-ac/project-crab/blob/master/protocols/RNA-isolation.md)
+This protocol was used for frozen larval RNA isolation. It follows the protocol for crab hemolymph isolation (https://github.com/grace-ac/project-crab/blob/master/protocols/RNA-isolation.md)
 
 Gathering materials/prepping reagents
 
