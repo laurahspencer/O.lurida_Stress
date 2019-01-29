@@ -10,7 +10,6 @@ Deploy.data$PH <- droplevels(Deploy.data$PH)
 Deploy.data$SIZE <- droplevels(Deploy.data$SIZE)
 Deploy.data$HAB.PH <- droplevels(Deploy.data$HAB.PH)
 Deploy.data$POP.PH.HAB <- droplevels(Deploy.data$POP.PH.HAB)
-str(Deploy.data)
 aggregate(DEPLOYED ~ POPULATION + PH, Deploy.data, mean) #number deployed in each group
 
 # Compare survival between habitats overall
@@ -43,11 +42,11 @@ aggregate(perc.surv ~ PH + SIZE, data=Deploy.data, var, na.rm=TRUE)
 aggregate(perc.surv ~ POPULATION + PH + SIZE, data=Deploy.data, mean, na.rm=TRUE)
 
 aggregate((SURVIVED/DEPLOYED) ~ PH, Deploy.data, mean, na.rm=TRUE)
-#   PH      SIZE      (SURVIVED/DEPLOYED)
-#  Ambient    L           0.3284651
-#      Low    L           0.4426619
-#  Ambient    S           0.2538462
-#      Low    S           0.4305556
+# PH      (SURVIVED/DEPLOYED)
+#  A           0.2944284
+#  L           0.4375645
+
+aggregate((SURVIVED/DEPLOYED) ~ PH, Deploy.data, sd, na.rm=TRUE)
 
 aggregate((SURVIVED/DEPLOYED) ~ PH + POPULATION, subset(Deploy.data, HABITAT != "NA"), mean, na.rm=TRUE)
 #PH POPULATION (SURVIVED/DEPLOYED)
@@ -60,13 +59,15 @@ aggregate((SURVIVED/DEPLOYED) ~ PH + POPULATION, subset(Deploy.data, HABITAT != 
 # Ambient       SSF2          0.197
 #     Low       SSF2          0.044
 
+aggregate((SURVIVED/DEPLOYED) ~ PH, Deploy.data, mean, na.rm=TRUE)
 aggregate((SURVIVED/DEPLOYED) ~ PH + POPULATION, subset(Deploy.data, HABITAT != "NA"), sd, na.rm=TRUE)
 
 
-aggregate(DEPLOYED ~ PH, Deploy.data, sum, na.rm=TRUE)
+aggregate(DEPLOYED ~ PH + POPULATION, Deploy.data, sum, na.rm=TRUE)
 aggregate(SURVIVED ~ PH, Deploy.data, sum, na.rm=TRUE)
 100*186/677
 100*290/664
+aggregate(SURVIVED ~ PH + POPULATION, Deploy.data, sum, na.rm=TRUE)
 
 aggregate((SURVIVED/DEPLOYED) ~ HABITAT+PH, Deploy.data, mean, na.rm=TRUE) 
 # HABITAT PH (SURVIVED/DEPLOYED)
@@ -87,6 +88,7 @@ aggregate((SURVIVED/DEPLOYED) ~ BAY, Deploy.data, mean, na.rm=TRUE)
 # PG   0.485
 # SK   0.317
 
+aggregate(DEPLOYED ~ PH, Deploy.data, sum, na.rm=TRUE) 
 aggregate(DEPLOYED ~ POPULATION+PH, Deploy.data, mean, na.rm=TRUE) 
 # POPULATION  PH DEPLOYED
 #   FB  Ambient      240

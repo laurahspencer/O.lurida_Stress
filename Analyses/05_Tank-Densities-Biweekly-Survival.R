@@ -5,7 +5,7 @@ rm(list=ls())         #start script by deleting all objects - clean slate
 Bucket.Densities <- read.csv("Data/Bucket-Densities-revised.csv", header = F, stringsAsFactors = F, na.strings = c("NA", "#DIV/0!", "#VALUE!"))
 colnames(Bucket.Densities) <- Bucket.Densities[2,]
 Bucket.Densities <- Bucket.Densities[-1:-2,]
-View(Bucket.Densities)
+
 # NOTES regarding groups with 2 larval buckets initially:  
 # NF10-Low, started new bucket on 5/24 
 # NF10-Ambient, started new bucket on 5/25
@@ -41,6 +41,8 @@ Bucket.Densities.long[,c("Temperature", "pH")] <- str_split_fixed(Bucket.Densiti
 Bucket.Densities.long[,"Temperature"] <- as.factor(Bucket.Densities.long[,"Temperature"])
 Bucket.Densities.long[,"pH"] <- as.factor(Bucket.Densities.long[,"pH"])
 Bucket.Densities.long <- subset(Bucket.Densities.long, value != 0)
+
+aggregate(value ~ pH + Population + Temperature, subset(Bucket.Densities.long, Count=="stocked"), sum)
 
 # Reformat again to wide, with each bucket density from day to day (includes larvae added, removed, over time)
 Bucket.Densities.wide <- dcast(Bucket.Densities.long, Bucket+Date+Population+Treatment+Temperature+pH ~ Count, value.var = "value")

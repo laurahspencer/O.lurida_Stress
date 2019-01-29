@@ -1,7 +1,7 @@
 ## Larval release plots and statistics, adapted from Katherine Silliman R code 
 
 rm(list=ls())         #start script by deleting all objects - clean slate 
-
+str(larvae)
 # Import data, convert groups to date, numeric and factors 
 larvae <- read.csv("Data/Spawning-Data.csv", header = TRUE, na.strings = "n/a", stringsAsFactors = F)
 larvae$Date <- as.Date(larvae$Date, "%m/%d/%y")
@@ -95,9 +95,9 @@ all.release.bars <- ggplot(data=all_total, aes(x=Date, y=total.released, fill=Tr
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0), legend.title = element_text(size=16), legend.text = element_text(size=16), axis.title = element_text(size=18, face = "bold"), panel.border=element_blank(), axis.line=element_line(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(), panel.background=element_blank(), legend.position = c(0.15, 0.85)) + scale_x_date(date_breaks = "1 week", date_labels = c( "93", "30", "37", "44", "51", "58", "65", "72", "79", "86")) + scale_fill_manual(values=c("gray60", "lightsteelblue3", "gray40", "steelblue"))
 
 # add line plot of cumulative larval release by treatment to the above barplot 
-All.release <- all.release.bars + geom_line(data=all_total, aes(x=Date, y=cum.total/8, group=Treatment, color=Treatment),size=.75) +
+All.release <- all.release.bars + geom_line(data=all_total, aes(x=Date, y=cum.total/25, group=Treatment, color=Treatment),size=.75) +
   scale_color_manual(values=c("gray60", "lightsteelblue3", "gray40", "steelblue")) +
-  scale_y_continuous(sec.axis = sec_axis(label=,~.*8,name="Cumulative Larvae Released"))
+  scale_y_continuous(sec.axis = sec_axis(label=,~.*25,name="Cumulative Larvae Released"))
 
 jpeg(file="Results/Larval-release-plot.jpeg", width = 1000, height=650)
 All.release #call plots 
@@ -112,7 +112,7 @@ spawning_group_total <- group_by(larvae, Spawning.Group, Population, Treatment, 
 
 # Summarize data for each treatment treatment, pulling out key dates and summing/averaging larvae 
 
-spawning_group_sum <- spawning_group_total %>% group_by(Population, pH, Temperature) %>% dplyr::summarize(overall_Total = sum(total.released, na.rm = T), mean.larvae = mean(total.released,na.rm=T), se.larvae = std.error(total.released,na.rm=T), mean.percap = mean(larvae.per.broodcm,na.rm=T), total.percap = sum(larvae.per.broodcm,na.rm=T), maxday = as.numeric(CalDay[which.max(total.released)]), max = max(total.released), max.percap = max(larvae.per.broodcm), first.big = as.numeric(CalDay[which(total.released > 10000)[1]]), release.days = as.numeric(length(CalDay[total.released > 10000])))
+spawning_group_sum <- spawning_group_total %>% group_by(Population, pH, Temperature, Spawning.Group) %>% dplyr::summarize(overall_Total = sum(total.released, na.rm = T), mean.larvae = mean(total.released,na.rm=T), se.larvae = std.error(total.released,na.rm=T), mean.percap = mean(larvae.per.broodcm,na.rm=T), total.percap = sum(larvae.per.broodcm,na.rm=T), maxday = as.numeric(CalDay[which.max(total.released)]), max = max(total.released), max.percap = max(larvae.per.broodcm), first.big = as.numeric(CalDay[which(total.released > 10000)[1]]), release.days = as.numeric(length(CalDay[total.released > 10000])))
 
 metrics <- list("total.released"=spawning_group_total$total.released, 
                 "overall_Total"=spawning_group_sum$overall_Total, 

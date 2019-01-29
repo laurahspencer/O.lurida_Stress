@@ -16,6 +16,9 @@ Oly.size.summary <- cbind(
 )
 colnames(Oly.size.summary) <- c("Group", "Count", "Mean", "SD")
 
+aggregate(value ~ PH, subset(Oly.size.long, TEMP==6), mean)
+aggregate(value ~ PH, subset(Oly.size.long, TEMP==6), sd)
+
 # merge stocking density dataframe with size summary data 
 Oly.size.summary2 <- merge(x=Oly.size.summary, y=stock.dens, by.x="Group", by.y="groups", all.x=T, all.y=F)
 Oly.size.summary2$Perc.count <- (Oly.size.summary2$Count/Oly.size.summary2$stocked)*100

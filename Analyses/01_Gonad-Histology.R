@@ -6,9 +6,9 @@ rm(list=ls())         #start script by deleting all objects - clean slate
 
 # Read in histology data. 
 Histology <- read.csv("Data/2017-Oly-Histo-Results-REDO-redostage5.csv", header=T, stringsAsFactors = T, na.strings = "NA")
-Histology$TEMPERATURE <- as.factor(Histology$TEMPERATURE)         #Convert a few columns to factors 
-Histology$Dominant.Stage <- as.factor(Histology$Dominant.Stage)   
+Histology$TEMPERATURE <- as.factor(Histology$TEMPERATURE)         #Convert a few columns to factors Histology$Dominant.Stage <- as.factor(Histology$Dominant.Stage)   
 Histology$Secondary.Stage <- as.factor(Histology$Secondary.Stage)
+Histology$PH <- factor(Histology$PH, levels = c("PRE","LOW","AMBIENT")) #reorder pH factors for plots 
 
 # --------------- QUESITON 1.  are there gonad differences between pre-OA treatment temperature groups (chilled, not chilled). 
 

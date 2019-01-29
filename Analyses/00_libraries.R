@@ -8,3 +8,6 @@ lapply(list.of.packages, FUN = function(X) {
 })
 
 source("References/panelcor.R")
+
+sessionInfo()
+

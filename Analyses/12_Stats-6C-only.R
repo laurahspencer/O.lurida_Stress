@@ -11,7 +11,6 @@ fisher.test(CT.sex.6.pH) #0.2398 No diff. in sex between pH treatments
 (12+7)/sum(CT.sex.6.pH[1,]) #% male & pred.female, ambient 
 (19+3)/sum(CT.sex.6.pH[1,]) #% male & pred.female, low
 
-
 fisher.test(CT.domstage.6.pH) #0.008287 Yes, difference in dominant gonad stage between pH treatment
 fisher.test(CT.secstage.6.pH) #0.9157 No diff. in secondary gonad stage. 
 
@@ -38,22 +37,40 @@ fisher.test(CT.secstage.6.low)  #0.081, not diff.
 # stacked bar plots with pre, amb, and low gonad stages (dominant)
 
 # all in one 
+
 jpeg(filename = "Results/6C-Gonad-plots.jpeg", width = 1270, height = 750) 
 par(mfrow = c(1,2)) #2x2 grid for plots
 
-# pink stage colors 
-# c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon")
-
 jpeg(filename = "Results/Gonad-barplot-chilled-stage", height = 750, width = 520)
-par(mar=c(5, 5, 4, 14))
-print(chilled.stage <- barplot(t(prop.table(CT.domstage.6, 1)), main="Gonad stage\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray99", "gray60", "gray30", "gray15", "gray75", "gray90"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.5)))
+par(mar=c(5, 5, 4, 18))
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6, 1)), main="Gonad stage, all populations\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.5)))
 dev.off()
+
+# Without the legend 
+par(mar=c(5, 5, 4, 3))
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6, 1)), main="Gonad stage, all populations\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = FALSE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.3)))
 
 # stacked bar plots with pre, amb and low gonad sexes (dominant)
 jpeg(filename = "Results/Gonad-barplot-chilled-sex", height = 750, width = 520)
 par(mar=c(5, 5, 4, 14))
 print(chilled.sex <- barplot(t(prop.table(CT.sex.6, 1)), main="Gonad sex\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"), cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Sex", cex=1.5)))
 dev.off()
+
+# Separate stage plots for each population 
+
+CT.domstage.6.pop <- table(subset(Histology, TEMPERATURE==6)$PH, subset(Histology, TEMPERATURE==6)$Dominant.Stage, subset(Histology, TEMPERATURE==6)$POPULATION)
+CT.domstage.6.pop
+
+
+par(mar=c(5, 5, 4, 0))
+# 385x650
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6.pop[,,"NF"], 1)), main="Fidalgo Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.3)))
+
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6.pop[,,"HL"], 1)), main="Dabob Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.3)))
+
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6.pop[,,"SN"], 1)), main="Oyster Bay C1", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.3)))
+
+print(chilled.stage <- barplot(t(prop.table(CT.domstage.6.pop[,,"K"], 1)), main="Oyster Bay C2", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.3)))
 
 # Summary statistics 
 
@@ -95,6 +112,80 @@ aggregate(Dominant.Stage ~ PH, subset(Histology.num, PH!="PRE" & TEMPERATURE==6 
 aggregate(Dominant.Stage ~ PH, subset(Histology.num, PH!="PRE" & TEMPERATURE==6 & (SEX == "H")), mean)
 aggregate(Dominant.Stage ~ PH, subset(Histology.num, PH!="PRE" & TEMPERATURE==6 & (SEX == "H")), sd)
 
+# Barplot of low and ambient ph stage, normalized by pre ------ remove probably 
+
+#test <- round(prop.table(CT.domstage.6), digits = 4)
+test <- t(CT.domstage.6)
+test1 <- test
+test1[2,] <- test[2,]/test[1,]
+test1[3,] <- test[3,]/test[1,]
+test1 <- test1[-1,]
+print(chilled.stage <- barplot(t(prop.table(test1, 1)), main="Gonad stage post-pH treatment\nnormalized by pre-treatment", xlab="pH Treatment", ylab="% Sampled, relative to pre-exposure", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = TRUE, args.legend = list(x = "topright", bty = "n", inset=c(-0.5, 0), title="Gonad Stage", cex=1.5)))
+
+# --- compare post pH treatment stages, by male, female, and hermaphroditic separately  
+CT.F <- table(subset(Histology, TEMPERATURE==6 & SEX=="HPF" | SEX=="F")$PH, subset(Histology, TEMPERATURE==6 & SEX=="HPF" | SEX=="F")$Dominant.Stage)
+CT.M <- table(subset(Histology, TEMPERATURE==6 & SEX=="HPM" | SEX=="M")$PH, subset(Histology, TEMPERATURE==6 & SEX=="HPM" | SEX=="M")$Dominant.Stage)
+CT.H <- table(subset(Histology, TEMPERATURE==6 & SEX=="H")$PH, subset(Histology, TEMPERATURE==6 & SEX=="H")$Dominant.Stage)
+
+fisher.test(CT.F[-1,], simulate.p.value = TRUE) #not sign. 
+fisher.test(CT.F[-3,], simulate.p.value = TRUE) #not sign. 
+fisher.test(CT.F[-2,], simulate.p.value = TRUE) #not sign. 
+
+fisher.test(CT.M[-1,]) #not sign. 
+fisher.test(CT.M[-3,]) #yes, ambient pH diff. from pre-treatment
+fisher.test(CT.M[-2,]) #not sign.
+
+fisher.test(CT.H[-1,]) #not sign. 
+fisher.test(CT.H[-3,]) #yes, ambient pH diff. from pre-treatment
+fisher.test(CT.H[-2,]) #yes, low pH diff. from pre-treatment
+
+# --- create summary table by collapsed sex categories, pH, stage
+Histology$sex.simple <- Histology$SEX #create a new column with sex categories collapsed 
+Histology$sex.simple <- gsub("HPF", "F", Histology$sex.simple)
+Histology$sex.simple <- gsub("HPM", "M", Histology$sex.simple)
+Hist.summary <- count(subset(Histology, TEMPERATURE==6), c("Dominant.Stage", "sex.simple", "PH"))
+write.csv(x = Hist.summary[with(Hist.summary, order(Hist.summary$sex.simple, Hist.summary$PH, Hist.summary$Dominant.Stage)),], file = "Results/Histology-summary-table.csv", row.names = F)
+
+# --- create summary table by population, pH, stage
+Hist.summary.pops <- count(subset(Histology, TEMPERATURE==6), c("Dominant.Stage", "POPULATION", "PH"))
+write.csv(x = Hist.summary.pops[with(Hist.summary.pops, order(Hist.summary.pops$POPULATION, Hist.summary.pops$PH, Hist.summary.pops$Dominant.Stage)),], file = "Results/Histology-summary-table-population.csv", row.names = F)
+
+# --- test pH effects between each population separately 
+CT.NF <- table(subset(Histology, TEMPERATURE==6 & POPULATION=="NF")$PH, subset(Histology, TEMPERATURE==6 & POPULATION=="NF")$Dominant.Stage)
+CT.HL <- table(subset(Histology, TEMPERATURE==6 & POPULATION=="HL")$PH, subset(Histology, TEMPERATURE==6 & POPULATION=="HL")$Dominant.Stage)
+CT.SN <- table(subset(Histology, TEMPERATURE==6 & POPULATION=="SN")$PH, subset(Histology, TEMPERATURE==6 & POPULATION=="SN")$Dominant.Stage)
+CT.K <- table(subset(Histology, TEMPERATURE==6 & POPULATION=="K")$PH, subset(Histology, TEMPERATURE==6 & POPULATION=="K")$Dominant.Stage)
+
+# diff. between pH treatments? 
+fisher.test(CT.NF[-1,], simulate.p.value = TRUE) #not sign. p-value = 0.1292
+fisher.test(CT.HL[-1,], simulate.p.value = TRUE) #not sign. p-value = 0.06061
+fisher.test(CT.SN[-1,], simulate.p.value = TRUE) #not sign. p-value = 0.7408
+fisher.test(CT.K[-1,], simulate.p.value = TRUE) #not sign. p-value = 0.6825
+
+# did gonad progress in ambient? (or more accurate, is there a difference?)
+fisher.test(CT.NF[-3,]) #YES. p-value = 0.008927
+fisher.test(CT.HL[-3,]) #YES. p-value = 0.01159
+fisher.test(CT.SN[-3,]) #NO. p-value = 0.3046
+fisher.test(CT.K[-3,]) #YES. p-value = 0.001731
+
+# did gonad progress in low? (or more accurate, is there a difference?)
+fisher.test(CT.NF[-2,]) #NO. p-value = 0.2383
+fisher.test(CT.HL[-2,]) #NO. p-value = 0.2346
+fisher.test(CT.SN[-2,]) #NO. p-value = 0.3406
+fisher.test(CT.K[-2,]) #YES. p-value = 0.01556 
+
+# Compare gonad stages between populations for pre-treatment, low and ambient pH separately 
+CT.pop <- table(subset(Histology, TEMPERATURE==6)$POPULATION, subset(Histology, TEMPERATURE==6)$Dominant.Stage, subset(Histology, TEMPERATURE==6)$PH)
+fisher.test(CT.pop[,,"PRE"], simulate.p.value = TRUE)      # p=0.6434
+fisher.test(CT.pop[,,"AMBIENT"], simulate.p.value = TRUE)  # p=0.152
+fisher.test(CT.pop[,,"LOW"], simulate.p.value = TRUE)      # p=0.07543
+
+# Compare gonad sexes between populations for pre-treatment, low and ambient pH separately 
+CT.pop.sex <- table(subset(Histology, TEMPERATURE==6)$POPULATION, subset(Histology, TEMPERATURE==6)$SEX, subset(Histology, TEMPERATURE==6)$PH)
+fisher.test(CT.pop.sex[,,"PRE"], simulate.p.value = TRUE)  
+fisher.test(CT.pop.sex[,,"AMBIENT"], simulate.p.value = TRUE)  
+fisher.test(CT.pop.sex[,,"LOW"], simulate.p.value = TRUE)      
+
 ###-------------- LARVAL RELEASE (FECUNDITY)  --------------###
 
 sum(aggregate(broodstock ~ Spawning.Group, subset(larvae, Temperature==6), mean)$broodstock)                                #number of broodstock total 
@@ -118,6 +209,26 @@ summary(max.aov <- aov(max ~ pH, data=subset(spawning_group_sum, Temperature==6)
 summary(maxday.aov <- aov(maxday ~ pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF
 summary(release.days <- aov(release.days ~ pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
 
+# Compare daily larval release by population
+TukeyHSD(aov(log(total.released+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- daily release data NO DIFF 
+TukeyHSD(aov(cum.total ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release NO DIFF 
+TukeyHSD(aov(cum.percap ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release per oyster*cm NO DIFF 
+TukeyHSD(aov(mean.larvae ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+TukeyHSD(aov(log(cum.total+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
+TukeyHSD(aov(log(cum.percap+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
+TukeyHSD(aov(first.big ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+TukeyHSD(aov(max ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+TukeyHSD(aov(maxday ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF
+TukeyHSD(aov(release.days ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+TukeyHSD(aov(overall.Total ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+
+View(spawning_group_sum)
+
+# Some population-specific comparisons 
+summary(aov(log(total.released+1) ~ pH, data=subset(spawning_group_total, Temperature==6 & Population=="NF" & total.released>10000)))
+summary(aov(log(total.released+1) ~ pH, data=subset(spawning_group_total, Temperature==6 & Population=="HL" & total.released>10000))) 
+summary(aov(log(total.released+1) ~ pH, data=subset(spawning_group_total, Temperature==6 & Population=="SN" & total.released>10000))) 
+summary(aov(log(total.released+1) ~ pH, data=subset(spawning_group_total, Temperature==6 & Population=="K" & total.released>10000))) 
 
 
 # Compare timing and # released 
@@ -125,43 +236,92 @@ summary(release.days <- aov(release.days ~ pH, data=subset(spawning_group_sum, T
 # cross correlation function --- try this 
 # https://onlinecourses.science.psu.edu/stat510/node/74/
 ccf 
+subset(spawning_group_total, Temperature==6 & pH=="Ambient")
+subset(spawning_group_total, Temperature==6 & pH=="Low")
 
+aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), mean, na.rm=TRUE) # average daily release
+aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), sd, na.rm=TRUE) # sd 
+aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), sum, na.rm=TRUE) # cumulative release
+
+fecundity <- aggregate(Tot.Larvae ~ pH + Temperature + Date, subset(larvae, Temperature==6), sum, na.rm=TRUE)
+fecundity.pop <- aggregate(Tot.Larvae ~ pH + Temperature + Population + Date, subset(larvae, Temperature==6), sum, na.rm=TRUE)
+
+ggplot(data=fecundity, aes(x=Date, y=Tot.Larvae, fill=pH)) + 
+  geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
+  ylab("No. of larvae\n(summed across populations)") + xlab(label=element_blank()) + ggtitle("Larvae released over time by pH, all populations") + theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
+  scale_y_continuous(limits=c(min=0,max=max(fecundity$Tot.Larvae))) +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+# For each population separately 
+
+ggplot(data=subset(fecundity.pop, Population == "HL"), aes(x=Date, y=Tot.Larvae, fill=pH)) + 
+  geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
+  ylab("No. of larvae") + xlab(label=element_blank()) + ggtitle("Larvae released over time by pH, Dabob Bay") + theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
+  scale_y_continuous(limits=c(min=0,max=max(fecundity$Tot.Larvae))) +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(fecundity.pop, Population == "NF"), aes(x=Date, y=Tot.Larvae, fill=pH)) + 
+  geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
+  ylab("No. of larvae") + xlab(label=element_blank()) + ggtitle("Larvae released over time by pH, Fidalgo Bay") + theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
+  scale_y_continuous(limits=c(min=0,max=max(fecundity$Tot.Larvae))) +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(fecundity.pop, Population == "SN"), aes(x=Date, y=Tot.Larvae, fill=pH)) + 
+  geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
+  ylab("No. of larvae") + xlab(label=element_blank()) + ggtitle("Larvae released over time by pH, Oyster Bay F1") + theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
+  scale_y_continuous(limits=c(min=0,max=max(fecundity$Tot.Larvae))) +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(fecundity.pop, Population == "K"), aes(x=Date, y=Tot.Larvae, fill=pH)) + 
+  geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
+  ylab("No. of larvae") + xlab(label=element_blank()) + ggtitle("Larvae released over time by pH, Oyster Bay F2") + theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
+  scale_y_continuous(limits=c(min=0,max=max(fecundity$Tot.Larvae))) +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
 
 
 # barplots of larvae released - low and ambient separately
 # SAVE SIZE 1000W X 500H
 
-ggplot(data=subset(fecundity, pH=="Low"), aes(x=Date, y=spawned)) + 
-  geom_bar(stat="identity",width=1, position = position_dodge(width=2), fill="seagreen3", col="gray60") + 
-  ylab("No. of larvae\n(summed across replicates)") + xlab(label=element_blank()) + ggtitle("Larvae Released Over Time, low pH") + theme_bw(base_size = 18) + 
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
-        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
-  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
-               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
-  scale_y_continuous(limits=c(min=0,max=max(fecundity$spawned))) +
-  theme(panel.grid.minor = element_blank(), 
-        panel.grid.major.x = element_blank(), panel.border = element_blank())
-
-ggplot(data=subset(fecundity, pH=="Ambient"), aes(x=Date, y=spawned)) + 
-  geom_bar(stat="identity",width=1, position = position_dodge(width=2), fill="skyblue3", col="gray60") + ylab("No. of larvae\n(summed across replicates)") + xlab(label=element_blank()) +
-  ggtitle("Larvae released over time, ambient pH") + theme_bw(base_size = 18) +   
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
-        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
-  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
-               limits=c(min=min(fecundity$Date)-1,max=max(fecundity$Date)+1)) +
-  scale_y_continuous(limits=c(min=0,max=max(fecundity$spawned))) +
-  theme(panel.grid.minor = element_blank(), 
-        panel.grid.major.x = element_blank(), panel.border = element_blank())
-
-
 ###-------------- LARVAL STOCKING DENSITY  --------------###
 
 plot(subset(Bucket.Densities.long, Count=="density" & Temperature==6)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature==6)$Treatment) #boxplot to inspect 
 kruskal.test(subset(Bucket.Densities.long, Count=="density" & Temperature==6)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature==6)$pH) # p=0.1123  <-- no pH difference 
-aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), mean)  
-aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), max)  
-aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), median)  
-
+View(subset(Bucket.Densities.long, Count=="density" & Temperature == 6))
+aggregate(value ~ pH + Population, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), mean)  
+aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), max)  
+aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), median)  
+aggregate(value ~ pH + Population, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), median)  
+aggregate(value ~ pH + Population, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 6), sd)  
 
 ### ------ biweekly bucket cleaning survival 
 # Test using aov on square-root arcsine transformed survival % data 
@@ -183,24 +343,76 @@ sd(subset(survival.biweekly, Temperature == 6)$survival)
 # sum and average daily stats for each pH
 density4barplots <- subset(Bucket.Densities.wide, Temperature==6) %>%
   group_by(Date, pH) %>%
-  summarize(setters=sum(setters, na.rm=T), stocked.new=sum(stocked, na.rm=T), stocked.tot=sum(expected, na.rm=T), stocked.mean=mean(expected, na.rm=T), stocked.sd=sd(expected, na.rm=T), counts.live=sum(actual, na.rm=T), survival.mean=mean(survival, na.rm=T), survival.sd=sd(survival, na.rm=T))
-
+  dplyr::summarize(setters=sum(setters, na.rm=T), stocked.new=sum(stocked, na.rm=T), stocked.tot=sum(expected, na.rm=T), stocked.mean=mean(expected, na.rm=T), stocked.sd=sd(expected, na.rm=T), counts.live=sum(actual, na.rm=T), survival.mean=mean(survival, na.rm=T), survival.sd=sd(survival, na.rm=T))
 density4barplots[density4barplots == 0] <- NA
 
-# SAVE DIMENSIONS 1000W X 500H
+density4barplots.pops <- subset(Bucket.Densities.wide, Temperature==6) %>%
+  group_by(Date, pH, Population) %>%
+  dplyr::summarize(setters=sum(setters, na.rm=T), stocked.new=sum(stocked, na.rm=T), stocked.tot=sum(expected, na.rm=T), stocked.mean=mean(expected, na.rm=T), stocked.sd=sd(expected, na.rm=T), counts.live=sum(actual, na.rm=T), survival.mean=mean(survival, na.rm=T), survival.sd=sd(survival, na.rm=T))
+density4barplots.pops[density4barplots.pops == 0] <- NA
+
+# Calculate mean % survival between biweekly screenings, by population & pH
+aggregate(actual/(actual+dead) ~  pH + Population, data=subset(Bucket.Densities.wide, dead>0 & Temperature ==6), mean)
+aggregate(actual/(actual+dead) ~  pH + Population, data=subset(Bucket.Densities.wide, dead>0 & Temperature ==6), sd)
 
 # barplot of setters 
+# SAVE DIMENSIONS 1000W X 500H
+
 ggplot(data=density4barplots, aes(x=Date, y=setters, fill=pH)) + 
-  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae\n(summed across replicates)") + xlab(label=element_blank()) +
-  ggtitle("Eyed larvae over time, by parental pH") + theme_bw(base_size = 18) +   
+  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae\n(summed across populations)") + xlab(label=element_blank()) +
+  ggtitle("Eyed larvae over time, by parental pH, all populations") + theme_bw(base_size = 18) +   
   theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
         axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
   scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
                limits=c(min=min(density4barplots$Date)-1,max=max(density4barplots$Date)+1)) +
   theme(legend.position = c(0.15, 0.85), panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(), panel.border = element_blank()) +
-scale_fill_manual(values=c("gray70", "lightsteelblue"))
+scale_fill_manual(values=c("gray70", "steelblue"))
 
+# Population-specific setter plots 
+ggplot(data=subset(density4barplots.pops, Population=="SN"), aes(x=Date, y=setters, fill=pH)) + 
+  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae, Oyster Bay F1") + xlab(label=element_blank()) +
+  ggtitle("Eyed larvae over time, by parental pH\nOyster Bay F1") + theme_bw(base_size = 18) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(density4barplots$Date)-1,max=max(density4barplots$Date)+1)) +
+  theme(legend.position = c(0.15, 0.85), panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(density4barplots.pops, Population=="K"), aes(x=Date, y=setters, fill=pH)) + 
+  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae, Oyster Bay F2") + xlab(label=element_blank()) +
+  ggtitle("Eyed larvae over time, by parental pH\nOyster Bay F2") + theme_bw(base_size = 18) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(density4barplots$Date)-1,max=max(density4barplots$Date)+1)) +
+  theme(legend.position = c(0.15, 0.85), panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(density4barplots.pops, Population=="HL"), aes(x=Date, y=setters, fill=pH)) + 
+  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae, Dabob Bay") + xlab(label=element_blank()) +
+  ggtitle("Eyed larvae over time, by parental pH\nDabob Bay") + theme_bw(base_size = 18) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(density4barplots$Date)-1,max=max(density4barplots$Date)+1)) +
+  theme(legend.position = c(0.15, 0.85), panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
+
+ggplot(data=subset(density4barplots.pops, Population=="NF"), aes(x=Date, y=setters, fill=pH)) + 
+  geom_bar(stat="identity",width=1.5, position = position_dodge(width=2), col="gray60") + ylab("No. of larvae, Fidalgo Bay") + xlab(label=element_blank()) +
+  ggtitle("Eyed larvae over time, by parental pH\nFidalgo Bay") + theme_bw(base_size = 18) +   
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0, colour = "gray30"), 
+        axis.title = element_text(size=18, face = "bold", colour = "gray30")) +
+  scale_x_date(date_breaks = "1 week",date_labels ="%b-%d", 
+               limits=c(min=min(density4barplots$Date)-1,max=max(density4barplots$Date)+1)) +
+  theme(legend.position = c(0.15, 0.85), panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank()) +
+  scale_fill_manual(values=c("gray70", "steelblue"))
 
 # barplot of # larvae expected in tanks (i.e. restocked + new stocked)  
 ggplot(data=density4barplots, aes(x=Date, y=stocked.mean, fill=pH)) + 
@@ -253,7 +465,6 @@ ggplot(data=subset(density4barplots, Date != "2017-05-31"), aes(x=Date, y=surviv
   scale_fill_manual(values=c("gray70", "lightsteelblue"))
 
 
-
 ### ------ LARVAL SURVIVAL TO 224um 
 
 hist(subset(Survival.set, Temperature==6)$survival.setters)
@@ -292,7 +503,18 @@ anova(test.setters3) #
 # pH          1  8.9207  8.9207  3.4103 0.1620
 # Residuals   3  7.8474  2.6158       
 
+# how many 224um stocked in setting tanks? 
+aggregate(Setters.stocked ~ pH + Population, data=subset(Survival.set, Temperature==6), sum)
+aggregate(Setters.stocked ~ pH, data=subset(Survival.set, Temperature==6), sum)
+
+# how many post set stocked in bags? 
+aggregate(Singles ~ pH + Population, data=subset(Survival.set, Temperature==6), sum)
+aggregate(Singles ~ pH, data=subset(Survival.set, Temperature==6), sum)
+
+
+aggregate(survival.setters ~ pH + Population, data=subset(Survival.set, Temperature==6), mean)
 aggregate(survival.setters ~ pH, data=subset(Survival.set, Temperature==6), mean)
+aggregate(survival.setters ~ pH + Population, data=subset(Survival.set, Temperature==6), sd)
 aggregate(survival.setters ~ pH, data=subset(Survival.set, Temperature==6), sd)
 range(subset(Survival.set, Temperature==6)$survival.setters)
 
@@ -369,6 +591,7 @@ legend(44000, 3.3, legend=c("Low pH", "Ambient pH"),
 # strong evidence for stocking density effect on survival from 224um->post-set
 
 aggregate(survival.postset ~ pH, subset(Survival.post, Temperature==6), mean)
+aggregate(survival.postset ~ pH + Population, subset(Survival.post, Temperature==6), mean)
 aggregate(survival.postset ~ pH, subset(Survival.post, Temperature==6), sd)
 range(subset(Survival.post, Temperature==6)$survival.postset)
 
@@ -433,7 +656,7 @@ anova(lm(log(stocked) ~ PH, data=subset(Oly.size.summary4, TEMP==6)))
 # plots length data  
 
 colors <- c("10-AMB"="mediumseagreen", "10-LOW"="indianred2", "6-AMB"="blue", "6-LOW"="orange")
-colors2 <- c("AMBIENT"="gray50", "LOW"="lightsteelblue")
+colors2 <- c("AMBIENT"="gray50", "LOW"="steelblue")
 
 # Make multipanel plot 
 palette(colors2)
@@ -481,10 +704,56 @@ ggdensity(data=subset(Oly.size.long5,  value!="NA" & TEMP==6), x = "value",
   #font("legend.title", size=18, colour="gray30") +
   #font("legend.text", size=18, colour="gray30") 
 
+# relevel population/cohort factors geographically 
+Oly.size.long5$COHORT <- factor(Oly.size.long5$COHORT, levels = c("NF", "HL", "SN", "K"))
+levels(Oly.size.long5$COHORT)
 
-theme(axis.title.x = element_text(colour = "gray40"),
-      axis.title.y = element_text(colour = "gray40", face="bold")) + ylab("Species abundance") + xlab(element_blank()) + theme(legend.position="top",legend.text=element_text(size=10, colour="gray40"),  legend.key.size = unit(1.8, 'lines')) + theme(legend.title=element_blank()) + 
-  theme(strip.text.x = element_text(size = 12, colour = "gray40"))
+# Ambient pH length (uses subset of data, random selection of 120 oysters per group)
+ggplot(data=subset(Oly.size.long5,  value!="NA" & TEMP==6 & PH == "AMBIENT"), aes(x=value, y=..density..)) +
+  geom_density(aes(fill=COHORT), position="stack") + 
+  scale_fill_manual(values=c("gray30", "gray50", "gray70", "gray90"), name="Population",
+                    breaks=c("NF", "HL", "SN", "K"),
+                    labels=c("Fidalgo Bay", "Dabob Bay", "Oyster Bay F1", "Oyster Bay F2")) +
+  geom_vline(aes(xintercept=mean(value)),
+             color="black", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="AMBIENT" & COHORT=="NF")$value)), 
+             color="gray30", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="AMBIENT" & COHORT=="HL")$value)), 
+             color="gray50", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="AMBIENT" & COHORT=="SN")$value)), 
+             color="gray70", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="AMBIENT" & COHORT=="K")$value)), 
+             color="gray90", linetype="dashed", size=.75) +
+  labs(title="Shell length (mm)\nJuveniles by population, Ambient pH",x="shell length (mm)") +
+  font("title", size = 16, colour="gray30") +
+  font("xlab", size = 16, colour="gray30") +
+  font("ylab", size = 16, colour="gray30") +
+  font("xy.text", size = 16, colour="gray30") +
+  scale_x_continuous(limits=c(0, 23)) +
+  theme(legend.position=c(.6, .7))
+
+# Low pH length (uses subset of data, random selection of 120 oysters per group)
+ggplot(data=subset(Oly.size.long5,  value!="NA" & TEMP==6 & PH == "LOW"), aes(x=value, y=..density..)) +
+  geom_density(aes(fill=COHORT), position="stack") + 
+  scale_fill_manual(values=c("steelblue4", "steelblue", "steelblue1", "lightskyblue"), name="Population",
+                    breaks=c("NF", "HL", "SN", "K"),
+                    labels=c("Fidalgo Bay", "Dabob Bay", "Oyster Bay F1", "Oyster Bay F2")) +
+  geom_vline(aes(xintercept=mean(value)), color="black", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="LOW" & COHORT=="NF")$value)), 
+             color="steelblue4", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="LOW" & COHORT=="HL")$value)), 
+             color="steelblue", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="LOW" & COHORT=="SN")$value)), 
+             color="steelblue1", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==6 & PH=="LOW" & COHORT=="K")$value)), 
+             color="lightsteelblue", linetype="dashed", size=.75) +
+  labs(title="Shell length (mm)\nJuveniles by population, Low pH",x="shell length (mm)") +
+  font("title", size = 16, colour="gray30") +
+  font("xlab", size = 16, colour="gray30") +
+  font("ylab", size = 16, colour="gray30") +
+  font("xy.text", size = 16, colour="gray30") +
+  scale_x_continuous(limits=c(0, 23)) +
+  theme(legend.position=c(.6, .7))
 
 ### -------- Eelgrass deployment --------- #####
 
