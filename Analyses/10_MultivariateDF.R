@@ -20,8 +20,8 @@ head(Oly.size.summary3.c) #Juvenile summary stats after 10month growth
 names(Oly.size.summary3.c)[1] <- "GROUP" #rename group to GROUP 
 
 head(Deploy.data.c) # Juvenile deployment survival 
-Deploy.data.c$PH <- gsub("Low", "LOW", Deploy.data.c$PH)
-Deploy.data.c$PH <- gsub("Ambient", "AMB", Deploy.data.c$PH)
+Deploy.data.c$PH <- gsub("L", "LOW", Deploy.data.c$PH)
+Deploy.data.c$PH <- gsub("A", "AMB", Deploy.data.c$PH)
 Deploy.data.c$GROUP <- Deploy.data.c$POPULATION 
 Deploy.data.c$GROUP <- gsub("FB", "NF", Deploy.data.c$GROUP)
 Deploy.data.c$GROUP <- gsub("HC", "HL", Deploy.data.c$GROUP)
@@ -32,13 +32,13 @@ Deploy.data.c$GROUP <- paste(paste(Deploy.data.c$GROUP, "6", sep=""), Deploy.dat
 
 head(Deploy.growth.c) #Juvenile deployment growth data 
 # Create Group column 
-Deploy.growth.c$PH.y <- gsub("Ambient", "AMB", Deploy.growth.c$PH.y)
-Deploy.growth.c$PH.y <- gsub("Low", "LOW", Deploy.growth.c$PH.y)
+Deploy.growth.c$PH.y <- gsub("AMBIENT", "AMB", Deploy.growth.c$PH.y)
+Deploy.growth.c$PH.y <- gsub("LOW", "LOW", Deploy.growth.c$PH.y)
 Deploy.growth.c$GROUP <- paste(paste(Deploy.growth.c$COHORT, "6", sep=""), Deploy.growth.c$PH.y, sep="-")
 
 head(Post.mass.c) # Juvenile deployment mass data 
-Post.mass.c$PH <- gsub("Ambient", "AMB", Post.mass.c$PH)
-Post.mass.c$PH <- gsub("Low", "LOW", Post.mass.c$PH)
+Post.mass.c$PH <- gsub("A", "AMB", Post.mass.c$PH)
+Post.mass.c$PH <- gsub("L", "LOW", Post.mass.c$PH)
 Post.mass.c$GROUP <- Post.mass.c$POPULATION 
 Post.mass.c$GROUP <- gsub("FB", "NF", Post.mass.c$GROUP)
 Post.mass.c$GROUP <- gsub("HC", "HL", Post.mass.c$GROUP)
@@ -60,24 +60,20 @@ Deploy.stock$POPULATION <- gsub("FB", "NF", Deploy.stock$POPULATION)
 Deploy.stock$POPULATION <- gsub("HC", "HL", Deploy.stock$POPULATION)
 Deploy.stock$POPULATION <- gsub("SSF1", "SN", Deploy.stock$POPULATION)
 Deploy.stock$POPULATION <- gsub("SSF2", "K", Deploy.stock$POPULATION)
-Deploy.stock$PH <- gsub("Ambient", "AMB", Deploy.stock$PH)
-Deploy.stock$PH <- gsub("Low", "LOW", Deploy.stock$PH)
+Deploy.stock$PH <- gsub("A", "AMB", Deploy.stock$PH)
+Deploy.stock$PH <- gsub("L", "LOW", Deploy.stock$PH)
 Deploy.stock$GROUP <- paste(paste(Deploy.stock$POPULATION, "6", sep=""), Deploy.stock$PH, sep="-")
 
 # ADD MEAN % BIWEEKLY SURVIVAL 
 
 # merge to make master dataset 
-require(plyr)
+#require(plyr)
 master <- join_all(list(Survival.post.c,
                         Oly.size.summary3.c,
                         Deploy.stock,
                         Deploy.survival,
                         Deploy.growth.ave,
                         Deploy.mass.ave), by = 'GROUP', type = 'full')
-
-View(master)
-plot(x=master$Mean.stocked, y=master$Survival)
-plot(x=master$Mean.stocked, y=master$Mean, col=master$PH)
 
 # Select candidate variables to include in multivariate analysis 
 
@@ -91,5 +87,33 @@ write.csv(master.list, file="Analyses/multivariate-summary-table.csv")
 # NOTE:  If wanting to include the SN mini-experiment, use the file called multivariate-summary-table-adj.csv (manually edited version)
 
 write.csv(master, file="Analyses/master-summary-table.csv")
-View(master.list)
-aggregate(Days.Stocked ~ Population+PH, master.list, sum)
+
+
+# Correlation analysis
+
+oly.multivar <- read.csv("Analyses/multivariate-summary-table-adj.csv", header=T, stringsAsFactors = F)
+oly.multivar[c("Population", "Temperature", "PH", "GROUP")] <- lapply(oly.multivar[c("Population", "Temperature", "PH", "GROUP")], factor)
+
+# Inspect correlation between variables, to reduce # variables 
+pairs(oly.multivar[c("Total.Spawned", "Days.Stocked", "Larvae.stocked.adjusted", "Mean.larvae.stocked", "Setters.stocked", "survival.setters", "survival.postset", "Juv.stocked", "Juv.meanlength", "Deployment.stocked", "Deployment.survival", "Deployment.mean.growth", "Deployment.mean.mass")], lower.panel=panel.smooth, upper.panel=panel.cor)  
+
+# Remove variables that are highly correlated with other variables, to reduce # (total.spawned, days stocked, larvae stocked)
+jpeg(file="Results/Correlation-plot.jpeg", height=1300, width=1700)
+pairs(na.omit(oly.multivar[c("Mean.larvae.stocked", "survival.setters","Setters.stocked", "survival.postset", "Juv.stocked", "Juv.meanlength", "Deployment.survival", "Deployment.mean.growth", "Deployment.mean.mass")]), lower.panel=panel.smooth, upper.panel=panel.cor) #example result 
+dev.off()
+
+# Run correlation tests separately using cor.test, spearman 
+cor.test(x=subset(oly.multivar, Deployment.survival!="NA")$survival.setters, y=subset(oly.multivar, Deployment.survival!="NA")$Deployment.survival, method = "spearman")
+
+plot(x=oly.multivar$Juv.stocked, y=oly.multivar$Juv.meanlength, col=oly.multivar$Population)
+text(x=oly.multivar$Juv.stocked, y=oly.multivar$Deployment.survival, labels=oly.multivar$Population)
+
+plot(x=oly.multivar$Days.Stocked, y=oly.multivar$Deployment.survival, col=oly.multivar$Population)
+text(x=oly.multivar$Days.Stocked, y=oly.multivar$Deployment.survival, labels=oly.multivar$Population)
+
+plot(x=oly.multivar$survival.setters, y=oly.multivar$Deployment.survival, col=oly.multivar$Population)
+plot(x=oly.multivar$survival.setters, y=oly.multivar$Deployment.survival, col=oly.multivar$PH)
+text(x=oly.multivar$survival.setters, y=oly.multivar$Deployment.survival, labels=oly.multivar$Population)
+
+plot(x=oly.multivar$Juv.stocked, y=oly.multivar$Deployment.survival, col=oly.multivar$PH)
+text(x=oly.multivar$Juv.stocked, y=oly.multivar$Deployment.survival, labels=oly.multivar$Population)

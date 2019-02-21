@@ -24,12 +24,12 @@ Group.Buckets <- as.data.frame(cbind(Buckets, Groups)) #combine density data wit
 # ---- Reformat density dataframe, laboriously 
 
 Bucket.Densities.long <- na.omit(melt(Bucket.Densities[,-2], id.vars = "Date")) #melt into long format 
-Bucket.Densities.long$variable <- as.character(Bucket.Densities.long$variable)  #
-Bucket.Densities.long[,c("Bucket", "Count")] <- str_split_fixed(Bucket.Densities.long$variable, "\\.", 2)
-Bucket.Densities.long$Bucket <- as.factor(Bucket.Densities.long$Bucket)
-Bucket.Densities.long$Count <- as.factor(Bucket.Densities.long$Count)
-Bucket.Densities.long$Date <- as.Date(Bucket.Densities.long$Date, "%m/%d/%y")
-Bucket.Densities.long$value <- as.numeric(Bucket.Densities.long$value)
+Bucket.Densities.long$variable <- as.character(Bucket.Densities.long$variable)  #convert count info to character
+Bucket.Densities.long[,c("Bucket", "Count")] <- str_split_fixed(Bucket.Densities.long$variable, "\\.", 2) #split bucket/count info 
+Bucket.Densities.long$Bucket <- as.factor(Bucket.Densities.long$Bucket) #Convert bucket to factor
+Bucket.Densities.long$Count <- as.factor(Bucket.Densities.long$Count) #counvert count type to factor
+Bucket.Densities.long$Date <- as.Date(Bucket.Densities.long$Date, "%m/%d/%y") #convert date to date format 
+Bucket.Densities.long$value <- as.numeric(Bucket.Densities.long$value) #convert count data to numeric 
 
 # add columns to break up factors (temp, pH, population)
 Bucket.Densities.long$Group <- Bucket.Densities.long$Bucket
@@ -42,37 +42,45 @@ Bucket.Densities.long[,"Temperature"] <- as.factor(Bucket.Densities.long[,"Tempe
 Bucket.Densities.long[,"pH"] <- as.factor(Bucket.Densities.long[,"pH"])
 Bucket.Densities.long <- subset(Bucket.Densities.long, value != 0)
 
-aggregate(value ~ pH + Population + Temperature, subset(Bucket.Densities.long, Count=="stocked"), sum)
+aggregate(value ~ pH + Population + Temperature, subset(Bucket.Densities.long, Count=="setters"), sum)
 
 # Reformat again to wide, with each bucket density from day to day (includes larvae added, removed, over time)
 Bucket.Densities.wide <- dcast(Bucket.Densities.long, Bucket+Date+Population+Treatment+Temperature+pH ~ Count, value.var = "value")
 Bucket.Densities.wide$survival <- Bucket.Densities.wide$actual/Bucket.Densities.wide$expected # survival = (larvae out / larvae in)
 Bucket.Densities.wide$dead <- Bucket.Densities.wide$expected - Bucket.Densities.wide$actual   # dead = (larvae in - larvae out)
 
+
+
 # ------- Inspect stocking density data to see if densities were different between treatments. Cap was ~200k larvae / group at a time, but varied over time & between buckets 
 
-plot(subset(Bucket.Densities.long, Count=="density")$value ~ subset(Bucket.Densities.long, Count=="density")$Treatment) #boxplot to inspect 
+plot(subset(Bucket.Densities.long, Count=="density")$value ~ subset(Bucket.Densities.long, Count=="density")$Population) #boxplot to inspect 
 kruskal.test(subset(Bucket.Densities.long, Count=="density")$value ~ subset(Bucket.Densities.long, Count=="density")$pH) # p=0.5352  <-- no pH difference 
 kruskal.test(subset(Bucket.Densities.long, Count=="density")$value ~ subset(Bucket.Densities.long, Count=="density")$Temperature) # p=0.02606 <-- density diff by temperature  
+kruskal.test(subset(Bucket.Densities.long, Count=="density")$value ~ subset(Bucket.Densities.long, Count=="density")$Population) # p=5.667e-07 <-- density diff by population
+kruskal.test(subset(Bucket.Densities.long, Count=="density" & Population!="SN")$value ~ subset(Bucket.Densities.long, Count=="density" & Population!="SN")$Population) #  <-- remove SN group 
+
 kruskal.test(subset(Bucket.Densities.long, Count=="density" & Temperature == 6)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature == 6)$pH) # no density differences between pH in 6C
 kruskal.test(subset(Bucket.Densities.long, Count=="density" & Temperature == 10)$value ~ subset(Bucket.Densities.long, Count=="density" & Temperature == 10)$pH) #density diff between pH in 10C ... but how? 
+
 aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), mean) #stocking density lower in low pH group, in 10C 
 
 # Summary stats on density between treatments 
-aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), median)
+aggregate(value ~ pH + Temperature, data=subset(Bucket.Densities.long, Count=="density"), median)
+
 aggregate(value ~ pH, data=subset(Bucket.Densities.long, Count=="density" & Temperature == 10), sd)
-aggregate(value ~ Treatment, data=subset(Bucket.Densities.long, Count=="density"), mean) 
+aggregate(value ~ Population + Temperature + pH, data=subset(Bucket.Densities.long, Count=="density"), sd) 
+aggregate(value ~ Population, data=subset(Bucket.Densities.long, Count=="density"), sd) 
 aggregate(value ~ Treatment, data=subset(Bucket.Densities.long, Count=="density"), median) 
 aggregate(value ~ Treatment, data=subset(Bucket.Densities.long, Count=="density"), sd) 
 
 #### Plot bucket density across time color coded by treatment for trends 
-plot_ly(data = Bucket.Densities.wide, x = ~Date, y = ~density, type="scatter", mode="lines", color=~Treatment, colors = c("orange1", "indianred2", "skyblue3", "seagreen3"), hovertext=~Bucket) %>%  #generate plotly plot
+plot_ly(data = Bucket.Densities.wide, x = ~Date, y = ~density, type="scatter", mode="lines", color=~Population, colors = c("orange1", "indianred2", "skyblue3", "seagreen3"), hovertext=~Bucket) %>%  #generate plotly plot
         layout(title="2017 O. lurida Bucket Densities",
                yaxis = list(title = '# Larvae in Bucket'),
                legend = list(x=.75, y=.75))
 
 # plot % survival over time for trends 
-plot_ly(data = subset(Bucket.Densities.wide, dead >=0), x = ~Date, y = ~actual/expected, type="scatter", mode="markers", symbol=~pH, color=~Temperature, colors = c("orangered3","blue3"), size=~sqrt(expected), hovertext=~Population) %>%  #generate plotly plot
+plot_ly(data = subset(Bucket.Densities.wide, dead >=0), x = ~Date, y = ~actual/expected, type="scatter", mode="markers",  color=~Population, colors = c("orangered3","blue3", "purple", "black"), size=~sqrt(expected), hovertext=~Population) %>%  #generate plotly plot
   layout(title="2017 O. lurida survival between screenings\n
          marker size ~ # larvae stocked, color by pH treatment",
          yaxis = list(title = '% survival between screenings'),
@@ -88,32 +96,48 @@ plot_ly(data = subset(Bucket.Densities.wide, dead >=0), x = ~expected, y = ~actu
 
 
 # plot % survival against bucket density - is there a pattern? Is survival density dependent? 
-plot_ly(data = subset(Bucket.Densities.wide, dead >=0), x = ~expected, y = ~actual/expected, type="scatter", mode="markers", symbol=~Temperature, color=~pH, colors = c("orangered3","blue3"), size=~sqrt(expected), hovertext=~Population) %>%  #generate plotly plot
+plot_ly(data = Bucket.Densities.wide, x = ~expected, y = ~survival.t, type="scatter", mode="markers", color=~Population, colors = c("orangered3","blue3"), size=~sqrt(expected), hovertext=~Population) %>%  #generate plotly plot
   layout(title="O. lurida larvae survival between screenings\n
          marker size ~ # larvae stocked, color by pH treatment",
          yaxis = list(title = '% Survived between screenings'),
          xaxis = list(title = 'Bucket Density (# stocked)'),
          legend = list(x=100, y=.9))
 
+# Important - inspect transformed survival data for normality, then test diff. 
+hist(Bucket.Densities.wide$survival.t)
+qqnorm(Bucket.Densities.wide$survival.t)
+shapiro.test(Bucket.Densities.wide$survival.t) #normal 
 
+# survival related to tank density? Factors? 
+anova(lm(survival.t ~ expected, data=Bucket.Densities.wide)) #diff 
+anova(lm(survival.t ~ expected + factor(Population), data=Bucket.Densities.wide)) #diff 
+anova(lm(survival.t ~ expected + factor(pH), data=Bucket.Densities.wide)) #no diff
+anova(lm(survival.t ~ expected + factor(Temperature), data=Bucket.Densities.wide)) #no diff
+Bucket.Densities.wide$Population <- relevel(Bucket.Densities.wide$Population, ref = "HL")
+summary(lm(survival.t ~ expected + factor(Population), data=Bucket.Densities.wide)) #diff btwn SN & HL 
+
+aggregate(survival ~ Population, data=Bucket.Densities.wide, mean) 
+aggregate(expected ~ Population, data=Bucket.Densities.wide, sd) 
+
+plot(x=Bucket.Densities.wide$Population, y=Bucket.Densities.wide$survival.t)
 # ------- Compare % larval survival between biweekly screenings, using # larvae stocked (included new larvae added), and # larvae counted. Remember: 224um larvae were counted, but then removed from the larval buckets. 
 
 # Boxplot of % survival between screenings by treatment - trend? No obvious diff. 
-ggplot(subset(Bucket.Densities.wide, survival<1.5), aes(x=Treatment, y= survival, fill=Treatment)) + 
-  geom_boxplot() +
+ggplot(subset(Bucket.Densities.wide, survival<1.5), aes(x=Population, y= survival, fill=pH)) + 
+  geom_boxplot() + 
   labs(title="Percent survival between screenings\n(2x weekly, n=19)",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 16) + xlab("Population") +
-  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
+  theme_bw(base_size = 16) + xlab("pH") +
+  theme(plot.title = element_text(face = 'bold',size = 20, hjust = 0)) + scale_fill_manual(values=c("gray50", "steelblue3"))
 
 # Inspect differences in survival between screening dates (counted & restocked 2x weekly) 
-aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), mean)
+aggregate(actual/(actual+dead) ~ Temperature + pH + Population, data=subset(Bucket.Densities.wide, dead>0), mean)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), median)
 aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), var)
-aggregate(actual/(actual+dead) ~ Temperature + pH, data=subset(Bucket.Densities.wide, dead>0), sd)
+aggregate(actual/(actual+dead) ~ Temperature + pH + Population, data=subset(Bucket.Densities.wide, dead>0), sd)
 # summary stats indicate likely no difference 
 
 # test using beta regression with proportion of live 
-summary(beta.biweekly <- betareg(survival ~ Temperature/pH, data=subset(Bucket.Densities.wide, dead>0)))
+summary(beta.biweekly <- betareg(survival ~ Population, data=subset(Bucket.Densities.wide, dead>0)))
 plot(beta.biweekly$residuals) #no diff. 
 
 # Test using aov on square-root arcsine transformed survival % data 
@@ -127,8 +151,19 @@ Bucket.Densities.wide$survival.t <- asin(sqrt(Bucket.Densities.wide$survival)) #
 survival.biweekly <- subset(Bucket.Densities.wide, (survival.t!= "NA" & survival.t!="NaN")) 
 
 # Compare % survival (sqrt-asin transformed) between chilled/unchiled (temperature) and pH treatment groups 
-anova(lm(survival.t ~ pH, data=survival.biweekly)) #no diff
-anova(lm(survival.t ~ Temperature, data=survival.biweekly)) #no diff 
+anova(biweekly.lm <- aov(survival.t ~ pH, data=survival.biweekly)) #population dff
+TukeyHSD(biweekly.lm <- aov(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) #population dff
+
+
+plot(biweekly.lm$residuals) #look good 
+TukeyHSD(biweekly.lm) #sign. diff between SN and HL 
+aggregate(survival ~ Population, data=survival.biweekly, mean)
+aggregate(survival ~ Population, data=survival.biweekly, sd)
+
+anova(lm(survival.t ~ Population, data=survival.biweekly)) 
+anova(lm(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) 
+summary(lm(survival.t ~ Population, data=survival.biweekly)) #no diff 
+
 summary(lm(survival.t ~ expected, data=survival.biweekly)) # Include stocking density (aka "expected", for the # larvae put into bucket). yes diff, but how? the scatter plot above doesn't indicate +/- stocking influence ... 
 
 summary(lm(survival.t ~ expected*Temperature*pH, data=survival.biweekly)) # include all 3 factors 
@@ -206,3 +241,31 @@ ggplot(data=Bucket.Densities.wide, aes(x=Date, y=setters, fill=Population)) +
   scale_x_date(date_breaks = "1 week",date_labels ="%b-%d") +
   theme(legend.position = c(0.15, 0.85)) + scale_fill_manual(values=c("orange1", "indianred2", "skyblue3", "seagreen3"))
 
+write.csv(x = Bucket.Densities.wide, file = "Results/bucket-densities.csv")
+
+eyed.larvae <- read.csv("Data/eyed-larvae-timeline.csv")
+str(eyed.larvae)
+eyed.larvae$temp <- as.factor(eyed.larvae$temp)
+shapiro.test(eyed.larvae$Time.onset)
+shapiro.test(eyed.larvae$Time.last)
+shapiro.test(eyed.larvae$Time.peak)
+plot(x=eyed.larvae$Pop, y=eyed.larvae$Time.onset)
+plot(x=eyed.larvae$Pop, y=eyed.larvae$Time.last)
+plot(x=eyed.larvae$Pop, y=eyed.larvae$Time.peak)
+plot(x=eyed.larvae$ph, y=eyed.larvae$Time.onset)
+
+summary(aov(Time.onset ~ Pop, data=eyed.larvae))
+summary(aov(Time.onset ~ ph, data=eyed.larvae))
+summary(aov(Time.onset ~ temp, data=eyed.larvae))
+
+aggregate(Time.onset ~ Pop, data=eyed.larvae, mean)
+aggregate(Time.last ~ Pop, data=eyed.larvae, mean)
+aggregate(Time.last ~ Pop, data=eyed.larvae, sd)
+aggregate(Time.onset ~ ph, data=eyed.larvae, mean)
+aggregate(Time.onset ~ temp, data=eyed.larvae, mean)
+
+
+summary(aov(Time.last ~ Pop, data=eyed.larvae))
+TukeyHSD(aov(Time.last ~ Pop, data=eyed.larvae))
+summary(aov(Time.last ~ ph, data=eyed.larvae))
+summary(aov(Time.last ~ temp, data=eyed.larvae))

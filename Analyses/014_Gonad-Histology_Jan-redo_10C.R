@@ -11,6 +11,16 @@ Histology.Jan.redo.10$Sex.redo <- factor(Histology.Jan.redo.10$Sex.redo, levels=
 Histology.Jan.redo.10$Dom.Stage.redo <- as.factor(Histology.Jan.redo.10$Dom.Stage.redo)
 Histology.Jan.redo.10$Dom.Stage.redo <- droplevels(Histology.Jan.redo.10$Dom.Stage.redo, exclude = "#N/A")
 
+(13+11)/54 #pre 6
+(9+12)/39 #low 6
+(15+16)/39 #amb 6
+
+(11+27)/54 #pre 10
+(13+21)/39 #low 10
+(19+7)/39 #amb 10
+
+
+
 # Prepare contingency tables 
 
 CT.sex <- table(subset(Histology.Jan.redo.10, TEMPERATURE==10)$PH, subset(Histology.Jan.redo.10, TEMPERATURE==10)$Sex.redo)
@@ -81,6 +91,8 @@ chisq.test(CT.domsex.stage[-1,], simulate.p.value = T, B = 100000) #ambient vs. 
 chisq.test(CT.domsex.stage[-2,], simulate.p.value = T, B = 100000) #pre to ambient, X-squared=12.682 p=0.009299
 chisq.test(CT.domsex.stage[-3,], simulate.p.value = T, B = 100000) #pre to low, X-squared=5.2335, p=0.2837
 
+(11+27)/(11+27+2+11+3)
+
 # female only 
 colnames(CT.femstage) <- c("None present (0)", "Early (1)", "Advanced (2)", "Ripe (3)")
 #par(mar=c(5, 5, 4, 19))
@@ -100,8 +112,8 @@ chisq.test(CT.malestage[-3,-1], simulate.p.value = T, B = 10000) #pre to low, X-
 par(mar=c(5, 5, 4, 17))
 #  Sex
 print(barplot(t(prop.table(CT.sex, 1)), main="Gonad sex, all populations, 10°C\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-chisq.test(CT.sex[-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: X-squared=7.3468, p=0.2218
-chisq.test(CT.sex[-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: X-squared=14.972, p=0.01399
+chisq.test(CT.sex[-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: X-squared=2.9, p=0.733
+chisq.test(CT.sex[-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: X-squared=8.02, p=0.158
 chisq.test(CT.sex[-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: X-squared=8.1267, p=0.1598
 
 

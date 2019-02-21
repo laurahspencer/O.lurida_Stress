@@ -19,6 +19,14 @@ Survival$survival.setters <- Survival$Setters.stocked / Survival$Larvae.stocked.
 Survival$survival.postset <- Survival$Post.set / Survival$Setters.stocked #224um -> post-set 
 Survival.set <- droplevels(subset(Survival, survival.setters != "NA"))
 Survival.set$survival.setters <- Survival.set$survival.setters*100
+density.mean <- aggregate(density ~ Population+Temperature+pH, survival.biweekly, mean)
+density.mean$Group <- paste(density.mean$Population, density.mean$Temperature, sep="-")
+density.mean$Group <- factor(paste(density.mean$Group, density.mean$pH, sep=" "))
+Survival.set <- merge(x=Survival.set, density.mean[,c("density", "Group")], by.x="Group", by.y="Group")
+
+aggregate(survival.setters ~ pH + Temperature, data=Survival[,c("Population", "pH", "Temperature", "survival.setters")], mean)
+aggregate(survival.postset ~ pH + Temperature + Population, data=Survival[,c("Population", "pH", "Temperature", "survival.postset")], mean)
+
 
 par(mar = c(5,4,4,2)) ## default is c(5,4,4,2) + 0.1
 # Plot survival to 224um by pH treatment  (all populations combined) 
@@ -58,9 +66,16 @@ bartlett.test(survival.setters~pH, data=Survival.set) #0.8795
 # Test percent survival data against factors via summary(lm()). Do not apply weight based on # larvae reared. Drop variables sequentially with highest p-value. 
 
 # First test variables separately. None significant on their own 
-summary(test.setters1 <- lm(survival.setters ~ Population, data=Survival.set))
-summary(test.setters2 <- lm(survival.setters ~ Temperature, data=Survival.set))
-summary(test.setters3 <- lm(survival.setters ~ pH, data=Survival.set))
+plot(Survival.post$survival.setters ~ Survival.post$Mean.stocked, col=Survival.post$Population)
+summary(test.setters0 <- lm(survival.setters ~ Mean.stocked, data=Survival.post))
+anova(test.setters1 <- lm(survival.setters ~ Population, data=Survival.post))
+TukeyHSD(test.setters1 <- aov(survival.setters ~ Population, data=Survival.post))
+anova(test.setters1 <- lm(survival.setters ~ Population, data=subset(Survival.post, Population!="SN")))
+summary(test.setters2 <- lm(survival.setters ~ Temperature, data=Survival.post))
+summary(test.setters3 <- lm(survival.setters ~ factor(pH), data=Survival.post))
+
+plot(x=Survival.post$Population, y=Survival.post$survival.setters)
+plot(x=Survival.post$Population, y=Survival.post$survival.postset)
 
 # Now test variables together, using drop1 
 summary(test.setters4 <- lm(survival.setters ~ Population + Temperature + pH + Population:Temperature + Population:pH + Temperature:pH, data=Survival.set)) 
@@ -78,6 +93,7 @@ AIC(test.setters1, test.setters2, test.setters3, test.setters4, test.setters5, t
 
 summary(test.setters5) # Model p-value=0.2026, Adjusted R-squared=0.5127 AIC=65.31575
 summary(test.setters6) # Model p-value=0.06885, Adjusted R-squared=0.5459 AIC=67.13980
+summary(test.setters3) # Model p-value=0.1498, Adjusted R-squared=0.08104 AIC=-71
 
 anova(test.setters6) # 1 fewer covariates, best R-squared and total p-value. Most parsimonious.  
 # Predictor               Df SumSq  MeanSq  F-value Pr(>F)  

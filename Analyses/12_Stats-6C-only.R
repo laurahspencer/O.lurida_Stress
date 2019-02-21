@@ -210,19 +210,17 @@ summary(maxday.aov <- aov(maxday ~ pH, data=subset(spawning_group_sum, Temperatu
 summary(release.days <- aov(release.days ~ pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
 
 # Compare daily larval release by population
-TukeyHSD(aov(log(total.released+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- daily release data NO DIFF 
-TukeyHSD(aov(cum.total ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release NO DIFF 
-TukeyHSD(aov(cum.percap ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release per oyster*cm NO DIFF 
-TukeyHSD(aov(mean.larvae ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
-TukeyHSD(aov(log(cum.total+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
-TukeyHSD(aov(log(cum.percap+1) ~ Population, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
-TukeyHSD(aov(first.big ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
-TukeyHSD(aov(max ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
-TukeyHSD(aov(maxday ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF
-TukeyHSD(aov(release.days ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
-TukeyHSD(aov(overall.Total ~ Population, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
-
-View(spawning_group_sum)
+summary(aov(log(total.released+1) ~ Population+pH, data=subset(spawning_group_total, Temperature==6))) # <-- daily release data NO DIFF 
+summary(aov(cum.total ~ Population+pH, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release NO DIFF 
+summary(aov(cum.percap ~ Population+pH, data=subset(spawning_group_total, Temperature==6))) # <-- cumulative release per oyster*cm NO DIFF 
+summary(aov(mean.larvae ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+summary(aov(log(cum.total+1) ~ Population+pH, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
+summary(aov(log(cum.percap+1) ~ Population+pH, data=subset(spawning_group_total, Temperature==6))) # <-- NO DIFF
+summary(aov(first.big ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+summary(aov(max ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+summary(aov(maxday ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF
+summary(aov(release.days ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
+summary(aov(overall_Total ~ Population+pH, data=subset(spawning_group_sum, Temperature==6))) # <-- NO DIFF 
 
 # Some population-specific comparisons 
 summary(aov(log(total.released+1) ~ pH, data=subset(spawning_group_total, Temperature==6 & Population=="NF" & total.released>10000)))
@@ -242,9 +240,6 @@ subset(spawning_group_total, Temperature==6 & pH=="Low")
 aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), mean, na.rm=TRUE) # average daily release
 aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), sd, na.rm=TRUE) # sd 
 aggregate(Tot.Larvae ~ pH + Population, subset(larvae, Temperature==6), sum, na.rm=TRUE) # cumulative release
-
-fecundity <- aggregate(Tot.Larvae ~ pH + Temperature + Date, subset(larvae, Temperature==6), sum, na.rm=TRUE)
-fecundity.pop <- aggregate(Tot.Larvae ~ pH + Temperature + Population + Date, subset(larvae, Temperature==6), sum, na.rm=TRUE)
 
 ggplot(data=fecundity, aes(x=Date, y=Tot.Larvae, fill=pH)) + 
   geom_bar(stat="identity",width=1, position = position_dodge(width=2), col="gray60") + 
@@ -339,17 +334,6 @@ anova(lm(survival.t ~ Population*pH, data=subset(survival.biweekly, Temperature 
 aggregate(survival ~ pH, subset(survival.biweekly, Temperature == 6), mean) # no difference biweekly 
 mean(subset(survival.biweekly, Temperature == 6)$survival)
 sd(subset(survival.biweekly, Temperature == 6)$survival)
-
-# sum and average daily stats for each pH
-density4barplots <- subset(Bucket.Densities.wide, Temperature==6) %>%
-  group_by(Date, pH) %>%
-  dplyr::summarize(setters=sum(setters, na.rm=T), stocked.new=sum(stocked, na.rm=T), stocked.tot=sum(expected, na.rm=T), stocked.mean=mean(expected, na.rm=T), stocked.sd=sd(expected, na.rm=T), counts.live=sum(actual, na.rm=T), survival.mean=mean(survival, na.rm=T), survival.sd=sd(survival, na.rm=T))
-density4barplots[density4barplots == 0] <- NA
-
-density4barplots.pops <- subset(Bucket.Densities.wide, Temperature==6) %>%
-  group_by(Date, pH, Population) %>%
-  dplyr::summarize(setters=sum(setters, na.rm=T), stocked.new=sum(stocked, na.rm=T), stocked.tot=sum(expected, na.rm=T), stocked.mean=mean(expected, na.rm=T), stocked.sd=sd(expected, na.rm=T), counts.live=sum(actual, na.rm=T), survival.mean=mean(survival, na.rm=T), survival.sd=sd(survival, na.rm=T))
-density4barplots.pops[density4barplots.pops == 0] <- NA
 
 # Calculate mean % survival between biweekly screenings, by population & pH
 aggregate(actual/(actual+dead) ~  pH + Population, data=subset(Bucket.Densities.wide, dead>0 & Temperature ==6), mean)
@@ -754,6 +738,57 @@ ggplot(data=subset(Oly.size.long5,  value!="NA" & TEMP==6 & PH == "LOW"), aes(x=
   font("xy.text", size = 16, colour="gray30") +
   scale_x_continuous(limits=c(0, 23)) +
   theme(legend.position=c(.6, .7))
+
+# try 10C only
+
+# Ambient pH length (uses subset of data, random selection of 120 oysters per group)
+ggplot(data=subset(Oly.size.long5,  value!="NA" & TEMP==10 & PH == "AMBIENT"), aes(x=value, y=..density..)) +
+  geom_density(aes(fill=COHORT), position="stack") + 
+  scale_fill_manual(values=c("gray30", "gray50", "gray70", "gray90"), name="Population",
+                    breaks=c("NF", "HL", "SN", "K"),
+                    labels=c("Fidalgo Bay", "Dabob Bay", "Oyster Bay F1", "Oyster Bay F2")) +
+  geom_vline(aes(xintercept=mean(value)),
+             color="black", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="AMBIENT" & COHORT=="NF")$value)), 
+             color="gray30", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="AMBIENT" & COHORT=="HL")$value)), 
+             color="gray50", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="AMBIENT" & COHORT=="SN")$value)), 
+             color="gray70", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="AMBIENT" & COHORT=="K")$value)), 
+             color="gray90", linetype="dashed", size=.75) +
+  labs(title="10C Shell length (mm)\nJuveniles by population, Ambient pH",x="shell length (mm)") +
+  font("title", size = 16, colour="gray30") +
+  font("xlab", size = 16, colour="gray30") +
+  font("ylab", size = 16, colour="gray30") +
+  font("xy.text", size = 16, colour="gray30") +
+  scale_x_continuous(limits=c(0, 23)) +
+  theme(legend.position=c(.6, .7))
+
+# Low pH length (uses subset of data, random selection of 120 oysters per group)
+ggplot(data=subset(Oly.size.long5,  value!="NA" & TEMP==10 & PH == "LOW"), aes(x=value, y=..density..)) +
+  geom_density(aes(fill=COHORT), position="stack") + 
+  scale_fill_manual(values=c("steelblue4", "steelblue", "steelblue1", "lightskyblue"), name="Population",
+                    breaks=c("NF", "HL", "SN", "K"),
+                    labels=c("Fidalgo Bay", "Dabob Bay", "Oyster Bay F1", "Oyster Bay F2")) +
+  geom_vline(aes(xintercept=mean(value)), color="black", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="LOW" & COHORT=="NF")$value)), 
+             color="steelblue4", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="LOW" & COHORT=="HL")$value)), 
+             color="steelblue", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="LOW" & COHORT=="SN")$value)), 
+             color="steelblue1", linetype="dashed", size=.75) +
+  geom_vline(aes(xintercept=mean(subset(Oly.size.long5, value!="NA" & TEMP==10 & PH=="LOW" & COHORT=="K")$value)), 
+             color="lightsteelblue", linetype="dashed", size=.75) +
+  labs(title="10C Shell length (mm)\nJuveniles by population, Low pH",x="shell length (mm)") +
+  font("title", size = 16, colour="gray30") +
+  font("xlab", size = 16, colour="gray30") +
+  font("ylab", size = 16, colour="gray30") +
+  font("xy.text", size = 16, colour="gray30") +
+  scale_x_continuous(limits=c(0, 23)) +
+  theme(legend.position=c(.6, .7))
+
+
 
 ### -------- Eelgrass deployment --------- #####
 
