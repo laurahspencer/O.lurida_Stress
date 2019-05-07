@@ -1,9 +1,8 @@
 # After redoing separate male/female stages, re-do analysis. 
-Histology.Jan.redo <- read.csv("Data/2017-Oly-Histo-Results-REDO-January2019.csv", header=T, stringsAsFactors = T, na.strings = "NA")
 
-#Histology.Jan.redo <- subset(Histology.Jan.redo, TEMPERATURE==6)
+Histology.Jan.redo <- read.csv("Data/2017-Oly-Histo-Results-REDO-January2019.csv", header=T, stringsAsFactors = T, na.strings = "NA")
 Histology.Jan.redo$TEMPERATURE <- as.factor(Histology.Jan.redo$TEMPERATURE)         #Convert a few columns to factors 
-Histology.Jan.redo$PH <- factor(Histology.Jan.redo$PH, levels = c("PRE","LOW","AMBIENT")) #reorder pH factors for plots
+Histology.Jan.redo$PCO2 <- factor(Histology.Jan.redo$PCO2, levels = c("Pre","High","Ambient")) #reorder PCO2 factors for plots
 Histology.Jan.redo$Female.Stage <- as.factor(Histology.Jan.redo$Female.Stage)   
 Histology.Jan.redo$Male.Stage <- as.factor(Histology.Jan.redo$Male.Stage)
 Histology.Jan.redo$Sex.redo <- as.factor(Histology.Jan.redo$Sex.redo)
@@ -12,397 +11,590 @@ Histology.Jan.redo$Sex.redo <- factor(Histology.Jan.redo$Sex.redo, levels=c("I",
 Histology.Jan.redo$Dom.Stage.redo <- as.factor(Histology.Jan.redo$Dom.Stage.redo)
 Histology.Jan.redo$Dom.Stage.redo <- droplevels(Histology.Jan.redo$Dom.Stage.redo, exclude = "#N/A")
 
-# Prepare contingency tables 
 
-CT.sex <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Sex.redo)
-CT.sex.pop <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Sex.redo, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
-colnames(CT.sex) <- c("Undifferentiated", "Male", "Male dominant", "Hermaphroditic", "Female dominant", "Female")
-
-(CT.sex[1,])/sum(CT.sex[1,]) #pre treatment
-0.12962963+0.05555556+0.29629630 # % hermaphroditic
-0.38888889+0.12962963 # % male/male dominant pre-treatment
-0.29629630+0.03703704 # % female/female dominant pre-treatment
-
-(CT.sex[2,])/sum(CT.sex[2,]) #low pH
-0.23076923+0.17948718+0.12820513 # % hermaphroditic low-pH
-0.30769231+0.23076923 # % male/male dominant low-pH
-0.12820513+0.07692308 # % female/female dominant low-pH
-
-(CT.sex[3,])/sum(CT.sex[3,]) #ambient pH
-0.35897436+0.02564103+0.12820513 # % hermaphroditic amb-pH
-0.23076923+0.35897436 # % male/male dominant amb-pH
-0.12820513+0.17948718 # % female/female dominant amb-pH
-
-CT.domsex.stage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Dom.Stage.redo)
-CT.domsex.stage.pop <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
-colnames(CT.domsex.stage) <- c("Empty Follicles (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
-
-CT.malestage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Male.Stage)
-CT.malestage.pop <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Male.Stage, Histology.Jan.redo$POPULATION)
-
-CT.femstage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Female.Stage)
-CT.femstage.pop <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Female.Stage, Histology.Jan.redo$POPULATION)
-
-rowSums(CT.domsex.stage)
-
-16/54 # % stage 4 pre
-5/39 # % stage 4 low
-1/39 # % stage 4 amb
-
-13/54 # % stage 3 pre
-9/39 # % stage 3 low
-15/39 # % stage 3 amb
-
-11/54 # % stage 2 pre
-12/39 # % stage 2 low
-16/39 # % stage 2 amb
-
-12/54 # % stage 1 pre
-12/39 # % stage 1 low
-4/39 # % stage 1 amb
-
-2/54 # % stage 0 pre
-1/39 # % stage 0 low
-3/39 # % stage 0 amb
-
-rowSums(CT.domsex.stage)
-100*CT.domsex.stage[1,]/54
-20.370370+24.074074 
-100*CT.domsex.stage[2,]/39 #low pH 
-38.46154+23.076923
-100*CT.domsex.stage[3,]/39 #ambient pH
-41.025641+33.333333
-
-# barplots - save as 845x650
-
------- # Dominant stage
-
-print(barplot(t(prop.table(CT.domsex.stage, 1)), main="Gonad stage, all populations\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-
-chisq.test(CT.domsex.stage[-1,], simulate.p.value = T, B = 10000) #ambient vs. low, X-squared= 9.7381, p-value = 0.0364
-chisq.test(CT.domsex.stage[-2,], simulate.p.value = T, B = 10000) #pre to ambient, X-squared=16.514 p=0.0019
-chisq.test(CT.domsex.stage[-3,], simulate.p.value = T, B = 10000) #pre to low, X-squared=4.5654, p=0.3521
-
-# female only 
-colnames(CT.femstage) <- c("None present (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
-par(mar=c(5, 5, 4, 20))
-print(barplot(t(prop.table(CT.femstage, 1)), main="Female", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-chisq.test(CT.femstage[-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low, p=0.2185
-chisq.test(CT.femstage[-2,-1], simulate.p.value = T, B = 10000) #pre to ambient, p=0.07639
-chisq.test(CT.femstage[-3,-1], simulate.p.value = T, B = 10000) #pre to low, p=0.3464
-
-# male only
-colnames(CT.malestage) <- c("None present (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
-
-print(barplot(t(prop.table(CT.malestage, 1)), main="Male", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"), cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-.5, 0), title="Gonad Stage", cex=1.5)))
-chisq.test(CT.malestage[-1,], simulate.p.value = T, B = 10000) #ambient vs. low, X-squared = 8.975, p-value = 0.0297
-chisq.test(CT.malestage[-2,], simulate.p.value = T, B = 10000) #pre to ambient, X-squared=24.197, p=9.999e-05
-chisq.test(CT.malestage[-3,], simulate.p.value = T, B = 10000) #pre to low, X-squared=15.159, p=0.0011
-
-par(mar=c(5, 5, 4, 17))
-#  Sex
-print(barplot(t(prop.table(CT.sex, 1)), main="Dominant gonad sex", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-chisq.test(CT.sex[-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: X-squared=7.3468, p=0.2018
-chisq.test(CT.sex[-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: X-squared=15.148, p=0.006499
-chisq.test(CT.sex[-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: X-squared=8.57, p=0.1319
-
-------- # Dominant gonad stage by each population
-
-# Fidalgo Bay
-pdf(file="Results/6C-gonad-stage-FB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"NF", "6"], 1)), main="Fidalgo Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5854
-fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.1239
-fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.2677
-
-# Dabob Bay
-pdf(file="Results/6C-gonad-stage-DB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"HL", "6"], 1)), main="Dabob Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5395
-fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.008799
-fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.7423
-
-# Oyster Bay Cohort 1
-pdf(file="Results/6C-gonad-stage-OB1", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"SN", "6"], 1)), main="Oyster Bay C1", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; P=1
-fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.2458
-fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.1698
-
-# Oyster Bay Cohort 2
-pdf(file="Results/6C-gonad-stage-OB2", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"K", "6"], 1)), main="Oyster Bay C2", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"K", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.08539
-fisher.test(CT.domsex.stage.pop[,,"K", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.002
-fisher.test(CT.domsex.stage.pop[,,"K", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.005799
-
-# Fidalgo Bay
-pdf(file="Results/10C-gonad-stage-FB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"NF", "10"], 1)), main="Fidalgo Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5854
-fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.1239
-fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.2677
-
-# Dabob Bay
-pdf(file="Results/10C-gonad-stage-DB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"HL", "10"], 1)), main="Dabob Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5395
-fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.008799
-fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.7423
-
-# Oyster Bay Cohort 1
-pdf(file="Results/10C-gonad-stage-OB1", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"SN", "10"], 1)), main="Oyster Bay C1", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; P=1
-fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.2458
-fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.1698
-
-# Oyster Bay Cohort 2
-pdf(file="Results/10C-gonad-stage-OB2", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.domsex.stage.pop[,,"K", "10"], 1)), main="Oyster Bay C2", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.domsex.stage.pop[,,"K", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.08539
-fisher.test(CT.domsex.stage.pop[,,"K", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.002
-fisher.test(CT.domsex.stage.pop[,,"K", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.005799
-
-
------ # Male gonad stage by each population
-
-# Fidalgo Bay
-print(barplot(t(prop.table(CT.malestage.pop[,,"NF"], 1)), main="Fidalgo Bay Male\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.malestage.pop[,,"NF"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.8721
-fisher.test(CT.malestage.pop[,,"NF"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.6344
-fisher.test(CT.malestage.pop[,,"NF"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3057
-
-# Dabob Bay
-print(barplot(t(prop.table(CT.malestage.pop[,,"HL"], 1)), main="Dabob Bay Male\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.malestage.pop[,,"HL"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.6294
-fisher.test(CT.malestage.pop[,,"HL"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.5834
-fisher.test(CT.malestage.pop[,,"HL"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3896
-
-# Oyster Bay Cohort 1
-print(barplot(t(prop.table(CT.malestage.pop[,,"SN"], 1)), main="Oyster Bay C1 Male\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.malestage.pop[,,"SN"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.07592
-fisher.test(CT.malestage.pop[,,"SN"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.05095
-fisher.test(CT.malestage.pop[,,"SN"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3357
-
-# Oyster Bay Cohort 2
-print(barplot(t(prop.table(CT.malestage.pop[,,"K"], 1)), main="Oyster Bay C2 Male\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.malestage.pop[,,"K"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 1
-fisher.test(CT.malestage.pop[,,"K"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 9.999e-05
-fisher.test(CT.malestage.pop[,,"K"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.0007999
-
-
-
-
-
-
-
-
-
----- # Female gonad stage by each population
-  
-  # Fidalgo Bay
-print(barplot(t(prop.table(CT.femstage.pop[,,"NF"], 1)), main="Fidalgo Bay Female\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.femstage.pop[,,"NF"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.042
-fisher.test(CT.femstage.pop[,,"NF"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.0396
-fisher.test(CT.femstage.pop[,,"NF"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.4875
-
-# Dabob Bay
-print(barplot(t(prop.table(CT.femstage.pop[,,"HL"], 1)), main="Dabob Bay Female\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.femstage.pop[,,"HL"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1
-fisher.test(CT.femstage.pop[,,"HL"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.2118
-fisher.test(CT.femstage.pop[,,"HL"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.2198
-
-# Oyster Bay Cohort 1
-print(barplot(t(prop.table(CT.femstage.pop[,,"SN"], 1)), main="Oyster Bay C1 Female\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.femstage.pop[,,"SN"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1
-fisher.test(CT.femstage.pop[,,"SN"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.3147
-fisher.test(CT.femstage.pop[,,"SN"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3976
-
-# Oyster Bay Cohort 2
-print(barplot(t(prop.table(CT.femstage.pop[,,"K"], 1)), main="Oyster Bay C2 Female\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.femstage.pop[,,"K"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=0.4685
-fisher.test(CT.femstage.pop[,,"K"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.7263
-fisher.test(CT.femstage.pop[,,"K"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.7153
-
-4/39
-
-# --------- Compare sexes within Populations 
-CT.sex.pop
-
-# 6 temps! 
-pdf(file="Results/6C-gonad-sex-FB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"NF", "6"], 1)), main="Fidalgo Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"NF"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=1
-fisher.test(CT.sex.pop[,,"NF"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0979
-fisher.test(CT.sex.pop[,,"NF"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.3576
-
-pdf(file="Results/6C-gonad-sex-DB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"HL", "6"], 1)), main="Dabob Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"HL"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.6843
-fisher.test(CT.sex.pop[,,"HL"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.3307
-fisher.test(CT.sex.pop[,,"HL"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.1169
-
-pdf(file="Results/6C-gonad-sex-OB1", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"SN", "6"], 1)), main="Oyster Bay C1", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"SN"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.0428
-fisher.test(CT.sex.pop[,,"SN"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0425
-fisher.test(CT.sex.pop[,,"SN"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.95
-
-pdf(file="Results/6C-gonad-sex-OB2", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"K", "6"], 1)), main="Oyster Bay C2", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"K"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.1778
-fisher.test(CT.sex.pop[,,"K"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0218
-fisher.test(CT.sex.pop[,,"K"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.0195
-
-
-# 10 temps! 
-
-pdf(file="Results/10C-gonad-sex-FB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"NF", "10"], 1)), main="Fidalgo Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"NF"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=1
-fisher.test(CT.sex.pop[,,"NF"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0979
-fisher.test(CT.sex.pop[,,"NF"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.3576
-
-pdf(file="Results/10C-gonad-sex-DB", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"HL", "10"], 1)), main="Dabob Bay", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"HL"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.6843
-fisher.test(CT.sex.pop[,,"HL"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.3307
-fisher.test(CT.sex.pop[,,"HL"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.1169
-
-pdf(file="Results/10C-gonad-sex-OB1", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"SN", "10"], 1)), main="Oyster Bay C1", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"SN"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.0428
-fisher.test(CT.sex.pop[,,"SN"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0425
-fisher.test(CT.sex.pop[,,"SN"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.95
-
-pdf(file="Results/10C-gonad-sex-OB2", height = 6.5, width = 4.5)
-print(barplot(t(prop.table(CT.sex.pop[,,"K", "10"], 1)), main="Oyster Bay C2", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-dev.off()
-fisher.test(CT.sex.pop[,,"K"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.1778
-fisher.test(CT.sex.pop[,,"K"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0218
-fisher.test(CT.sex.pop[,,"K"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.0195
-
-
-# Generate male & female plots/tables with stages only dominant stage
-
-CT.stage.female <- table(subset(Histology.Jan.redo, TEMPERATURE==6 & Sex.redo=="F" | Sex.redo=="HPF")$PH, subset(Histology.Jan.redo, TEMPERATURE==6 & Sex.redo=="F" | Sex.redo=="HPF")$Dom.Stage.redo)
-print(barplot(t(prop.table(CT.stage.female, 1)), main="Gonad stage - Female Dominant\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.stage.female[-1,], simulate.p.value = T, B = 10000) #ambient vs. low, p=1
-fisher.test(CT.stage.female[-2,], simulate.p.value = T, B = 10000) #pre to ambient, p=0.0163
-fisher.test(CT.stage.female[-3,], simulate.p.value = T, B = 10000) #pre to low, p=0.1369
-
-CT.stage.male <- table(subset(Histology.Jan.redo, TEMPERATURE==6 & c(Sex.redo=="M" | Sex.redo=="HPM"))$PH, subset(Histology.Jan.redo, TEMPERATURE==6 & c(Sex.redo=="M" | Sex.redo=="HPM"))$Dom.Stage.redo)
-print(barplot(t(prop.table(CT.stage.male, 1)), main="Gonad stage - Male Dominant\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.stage.male[-1,], simulate.p.value = T, B = 10000) #ambient vs. low, p=0.6114
-chisq.test(CT.stage.male[-2,], simulate.p.value = T, B = 10000) #pre to ambient,  24.192, p-value = 9.999e-05
-chisq.test(CT.stage.male[-3,], simulate.p.value = T, B = 10000) #pre to low,  20.627, p-value = 2e-04
-
-CT.stage.herm <- table(subset(Histology.Jan.redo, TEMPERATURE==6 & Sex.redo=="H" | Sex.redo=="I")$PH, subset(Histology.Jan.redo, TEMPERATURE==6 & Sex.redo=="H" | Sex.redo=="I")$Dom.Stage.redo)
-print(barplot(t(prop.table(CT.stage.herm, 1)), main="Gonad stage - Herm. Dominant\npre- & post-pH treatment", xlab="pH Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
-fisher.test(CT.malestage[-1,], simulate.p.value = T, B = 10000) #ambient vs. low, p=0.0253
-fisher.test(CT.malestage[-2,], simulate.p.value = T, B = 10000) #pre to ambient, X-squared=19.733, p=9.999e-05
-fisher.test(CT.malestage[-3,], simulate.p.value = T, B = 10000) #pre to low, X-squared=17.181, p=0.0041s
-
-## Compare 6C to 10C GONAD - effect of temperature? 
-
-Histology.Jan.redo.10 #10C
-Histology.Jan.redo #6C
-
+## Compare 6C to 10C - effect of temperature?  alpha = 0.0125 (n=4 comparisons)
 Histology.prepH <- subset(Histology.Jan.redo, SAMPLING=="FEBRUARY")
-sum(CT.domsex.stage.pre[1,])
-4/108
+
+# make an empty dataframe for test statistic results 
+tests <-  data.frame(test=character(), chisquare=character(), pvalue=numeric(), stringsAsFactors=FALSE) 
 
 CT.domsex.stage.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Dom.Stage.redo)
+tests[1,] <- as.vector(unlist(chisq.test(CT.domsex.stage.pre, simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")]))
+#10 vs. 6C: X-squared = 15.842 p=0.0026
+
+CT.malestage.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Male.Stage)
+tests[2,] <- as.vector(unlist(chisq.test(CT.malestage.pre[,-1], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")]))
+#10 vs. 6C: 31.081, p-value = 9.999e-05 
+
+CT.femstage.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Female.Stage)
+tests[3,] <- as.vector(unlist(chisq.test(CT.femstage.pre[,-1], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")]))
+#10 vs. 6C: 2.1488 p-value = 0.669
+
+CT.sex.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Sex.simple)
+tests[4,] <- as.vector(unlist(chisq.test(CT.sex.pre, simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")]))
+#10 vs. 6C: X-squared = 7.9551, p-value = 0.1634
+
+# ------- Compare pH treatments - effect of pH? 
+
+# Prepare contingency tables 
+CT.sex <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.simple, Histology.Jan.redo$TEMPERATURE)
+CT.sex.plots <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.redo, Histology.Jan.redo$TEMPERATURE)
+CT.sex.pop <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.simple, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
+CT.sex.pop.plots <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.redo, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
+
+CT.sex.temp <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.simple, Histology.Jan.redo$TEMPERATURE)
+CT.domsex.stage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$TEMPERATURE)
+CT.domsex.stage.pop <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
+CT.malestage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Male.Stage, Histology.Jan.redo$TEMPERATURE)
+CT.malestage.pop <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Male.Stage, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
+CT.femstage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Female.Stage, Histology.Jan.redo$TEMPERATURE)
+CT.femstage.pop <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Female.Stage, Histology.Jan.redo$POPULATION, Histology.Jan.redo$TEMPERATURE)
+
+colnames(CT.sex.pop.plots) <- c("Indeterminate", "Male", "Male dominant", "Hermaphroditic", "Female dominant", "Female")
+colnames(CT.sex.plots) <- c("Indeterminate", "Male", "Male dominant", "Hermaphroditic", "Female dominant", "Female")
+colnames(CT.domsex.stage) <- c("Empty/No Follicles (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+
+# Compare using chi-square if N is large enough, fisher exact test if not.  n=6 comparisons per factor, alpha=0.0083333
+
+# Dominant stage, alpha=0.0083333
+tests[5,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-1,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, X-squared= 9.738, p-value = 0.0364   
+tests[6,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-2,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, X-squared=16.514 p=0.0019          
+tests[7,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-3,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to low, X-squared=4.5654, p=0.3521             
+
+tests[8,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-1,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, X-squared=12.458,  p-value = 0.009099
+tests[9,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-2,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, X-squared=12.682, p-value = 0.009999     
+tests[10,] <- as.vector(unlist(chisq.test(CT.domsex.stage[-3,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to low, X-squared=5.2335, p-value = 0.285        
+
+# female only, alpha=0.0083333
+tests[11,] <- as.vector(unlist(chisq.test(CT.femstage[-1,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, p=0.2185                                        
+tests[12,] <- as.vector(unlist(chisq.test(CT.femstage[-2,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, p=0.07639                                        
+tests[13,] <- as.vector(unlist(chisq.test(CT.femstage[-3,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to low, p=0.3464                                             
+
+tests[14,] <- as.vector(unlist(chisq.test(CT.femstage[-1,2:4,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, p=1                                  
+tests[15,] <- as.vector(unlist(chisq.test(CT.femstage[-2,2:4,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, p=0.1274                                        
+tests[16,] <- as.vector(unlist(chisq.test(CT.femstage[-3,2:4,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to low, p=0.06159                                          
+
+# male only, alpha=0.0083333
+tests[17,] <- as.vector(unlist(chisq.test(CT.malestage[-1,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, X-squared = 8.975, p-value = 0.0297              
+tests[18,] <- as.vector(unlist(chisq.test(CT.malestage[-2,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, X-squared=24.197, p=9.999e-05                     
+tests[19,] <- as.vector(unlist(chisq.test(CT.malestage[-3,-1,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to low, X-squared=15.159, p=0.0011                            
+
+tests[20,] <- as.vector(unlist(chisq.test(CT.malestage[-1,-1,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#ambient vs. low, X-squared = 12.949, p-value = 0.008699            
+tests[21,] <- as.vector(unlist(chisq.test(CT.malestage[-2,-1,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#pre to ambient, X-squared=15.387, p-value = 0.0036                    
+tests[22,] <- as.vector(unlist(chisq.test(CT.malestage[-3,-1,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")]))
+#pre to low, X-squared=0.55353, p=0.9742   
+
+# Sex, alpha=0.0083333
+tests[23,] <- as.vector(unlist(chisq.test(CT.sex[-1,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn ambient and low pH: X-squared=7.3468, p=0.2018                 
+tests[24,] <- as.vector(unlist(chisq.test(CT.sex[-2,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn pre and ambient pH: X-squared=15.148, p=0.006499               
+tests[25,] <- as.vector(unlist(chisq.test(CT.sex[-3,,"6"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn pre and low pH: X-squared=8.57, p=0.1319                       
+
+tests[26,] <- as.vector(unlist(chisq.test(CT.sex[-1,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn ambient and low pH: X-squared=2.8959, p-value = 0.7332              
+tests[27,] <- as.vector(unlist(chisq.test(CT.sex[-2,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn pre and ambient pH: X-squared=8.0168, p-value = 0.1625              
+tests[28,] <- as.vector(unlist(chisq.test(CT.sex[-3,,"10"], simulate.p.value = T, B = 10000)[c("data.name", "statistic", "p.value")])) 
+#sex btwn pre and low pH: X-squared=3.869, p-value = 0.6058         
+
+# Compare 6-amb to 10-low ... do T/pH treatments cancel? n=4 comparisons, alpha=0.0125
+
+CT.domsex.stage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$TEMPERATURE)
+tests[29,] <- as.vector(unlist(chisq.test(rbind(CT.domsex.stage[3,,c("6")],CT.domsex.stage[2,,c("10")]), simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+#X=2.8185, p=0.63
+
+CT.sex <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Sex.simple, Histology.Jan.redo$TEMPERATURE)
+tests[30,] <- as.vector(unlist(chisq.test(rbind(CT.sex[3,,c("6")],CT.sex[2,,c("10")]), simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+# X=11.7, p=0.037 
+
+CT.malestage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Male.Stage, Histology.Jan.redo$TEMPERATURE)
+tests[31,] <- as.vector(unlist(chisq.test(rbind(CT.malestage[3,-1,c("6")],CT.malestage[2,-1,c("10")]), simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+# p=0.6495
+
+CT.femstage <- table(Histology.Jan.redo$PCO2, Histology.Jan.redo$Female.Stage, Histology.Jan.redo$TEMPERATURE)
+tests[32,] <- as.vector(unlist(fisher.test(rbind(CT.femstage[3,-1,c("6")],CT.femstage[2,-1,c("10")]), simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+#  p=0.7785
+
+# Compare sex ratios between populations ... all treatments combined! 
+CT.stage.pop.allph <- t(table(Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$POPULATION))
+tests[33,] <- as.vector(unlist(chisq.test(CT.stage.pop.allph[,-1], simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+
+CT.sex.pop.allph <- t(table(Histology.Jan.redo$Sex.simple, Histology.Jan.redo$POPULATION))
+tests[34,] <- as.vector(unlist(chisq.test(CT.sex.pop.allph, simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) #very sign. 
+pairwiseNominalIndependence(CT.sex.pop.allph, fisher=FALSE, gtest=FALSE, chisq=TRUE,  method="fdr", simulate.p.value=T)
+
+CT.male.pop.allph <- t(table(Histology.Jan.redo$Male.Stage, Histology.Jan.redo$POPULATION))
+tests[35,] <- as.vector(unlist(chisq.test(CT.male.pop.allph[,-1], simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+
+CT.female.pop.allph <- t(table(Histology.Jan.redo$Female.Stage, Histology.Jan.redo$POPULATION))
+tests[36,] <- as.vector(unlist(chisq.test(CT.female.pop.allph[,-1], simulate.p.value = T, B=10000)[c("data.name", "statistic", "p.value")])) 
+
+tests$holm <- p.adjust(tests$pvalue, "holm")
+tests$BH <- p.adjust(tests$pvalue, "BH")
+View(tests) # review - opting to go with the less conservative, due to many different correlations in data 
+
+# After BH correction, sigificance retained for ... 
+# temp treatment differences
+CT.malestage.pre[, -1]      # Male stage after temp treatment 
+CT.domsex.stage.pre         # Dominant sex's stage after temp treatment 
+
+# pCO2 treatment differences 
+CT.malestage[-1, -1, "10"]    # Male stage between ambient and high pCO2, 10C group 
+CT.domsex.stage[-1, , "10"] # Dominant sex's stage between ambient and high pCO2, 10C group 
+
+# Ambient pCO2 treatment 
+CT.domsex.stage[-2, , "6"]  # Dominant sex's stage after ambient pCO2
+CT.domsex.stage[-2, , "10"] # Dominant sex's stage after ambient pCO2 treatment, 10C group
+CT.malestage[-2, , "6"]     # Male stage after ambient pCO2, 6C group 
+CT.malestage[-2, , "10"]    # Male stage after ambient pCO2, 10C group 
+
+# High pCO2 treatment 
+CT.malestage[-3, , "6"]     # Male stage between ambient and high pCO2, 6C group 
+
+# Sex differences among populations 
+CT.sex.pop.allph
+
+
+# PLOTS FOR PAPER AS OF 4/12/2019 
+
+# -------  Dominant gonad stage by each population
+  
+plot.cohort <- c("NF","HL", "SN", "K", "NF","HL", "SN", "K")
+plot.names <- c("Fidalgo Bay","Dabob Bay", "Oyster Bay C1", "Oyster Bay  C2", "Fidalgo Bay","Dabob Bay", "Oyster Bay C1", "Oyster Bay  C2")
+plot.temps <- c("6","6","6","6","10","10","10","10")
+
+# check out colors for stage plots
+
+# c(lighten("#E2E6BD", amount = 0.1),  lighten("#EAAB28", amount = 0.3), lighten("#E78A38", amount = 0.3),lighten("#D33F6A", amount = 0.5), lighten("#DF6753", amount = 0.3), lighten("lightsalmon", amount = 0.3))
+# show_col(c('#f7f7f7','#cccccc','#969696','#636363','#252525'))
+
+pdf(file="Results/gonad-stage-by-cohort", height = 5.75, width = 7.6)
+par(mfrow=c(2,4), oma=c(5,5,0,2), mar=c(0,3,5,0), mgp=c(2.6,0.6,0))
+for (i in 1:8) {
+  barplot(t(prop.table(CT.domsex.stage.pop[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+  title(plot.names[i], line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+  
+}
+mtext(side=1,text=(expression(paste(pCO[2], " treatment"))), outer=T,line=3.5, col="gray30", font=1, cex=1.1)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.2)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.7)
+mtext(side=2,text="6°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.7)
+mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.2)
+mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Gonad stage by temperature, ", pCO[2], ", and cohort")))
+dev.off()
+
+# make a plot for the legend 
+colnames(CT.domsex.stage.pop) <- c("Empty/No follicles (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+
+pdf(file="Results/gonad-stage-legend", height = 5.2, width = 5.6)
+par(mar=c(0,0,0,18))
+barplot(t(prop.table(CT.domsex.stage.pop[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1.8, 0), title="Gonad Stage", cex=1.5, text.col="gray30", text.font=1))
+dev.off()
+
+
+# Gonad sex for each population 
+
+# check out colors for stage plots
+#show_col(c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2", lighten("gray75", amount = 0.1),  lighten("royalblue3", amount = 0.3), lighten("mediumpurple3", amount = 0.3),lighten("purple3", amount = 0.3), lighten("mediumorchid3", amount = 0.3), lighten("hotpink2", amount = 0.3)))
+
+show_col(c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62"))
+
+pdf(file="Results/gonad-sex-by-cohort", height = 5.75, width = 7.6)
+par(mfrow=c(2,4), oma=c(5,5,0,2), mar=c(0,3,5,0), mgp=c(2.6,0.6,0))
+for (i in 1:8) {
+  barplot(t(prop.table(CT.sex.pop.plots[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62" ), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(plot.names[i], line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+}
+mtext(side=1,text=(expression(paste(pCO[2], " treatment"))), outer=T,line=3.5, col="gray30", font=1, cex=1.1)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.2)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.7)
+mtext(side=2,text="6°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.7)
+mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.2)
+mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Gonad sex by temperature, ", pCO[2], ", and cohort")))
+dev.off()
+
+# make a plot for the legend 
+colnames(CT.sex.pop.plots) <- c("Indeterminate", "Male", "Male dominant", "Hermaphroditic", "Female dominant", "Female")
+
+pdf(file="Results/gonad-sex-legend", height = 5.2, width = 5.6)
+par(mar=c(0,0,0,18))
+barplot(t(prop.table(CT.sex.pop.plots[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62" ), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1.6, 0), title="Gonad Sex", cex=1.5, text.col="gray30", text.font=1))
+dev.off()
+
+
+# plots with all populations combined 
+CT.sex.plots
+colnames(CT.malestage) <- c("Empty/No Follicles (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+colnames(CT.femstage) <- c("Empty/No Follicles (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+
+
+pdf(file="Results/gonad-stage-sex-all-cohorts", height = 5.75, width = 6.05)
+
+par(mfrow=c(2,3), oma=c(5,5,0,3), mar=c(0,3,5,0), mgp=c(2.6,0.6,0))
+barplot(t(prop.table(CT.sex.plots[,,"6"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62" ), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Sex", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+barplot(t(prop.table(CT.malestage[,,"6"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Male", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+barplot(t(prop.table(CT.femstage[,,"6"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Female", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+barplot(t(prop.table(CT.sex.plots[,,"10"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62" ), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Sex", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+barplot(t(prop.table(CT.malestage[,,"10"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Male", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+barplot(t(prop.table(CT.femstage[,,"10"], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+title(main = "Female", line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+
+mtext(side=1,text=(expression(paste(pCO[2], " treatment"))), outer=T,line=3.5, col="gray30", font=1, cex=1.1)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.2)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.7)
+mtext(side=2,text="6°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.7)
+mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.2)
+mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Gonad sex and male/female gamete stage, cohorts combined")))
+dev.off()
+
+
+
+# -------  Male gonad stage by each population
+CT.malestage.pop
+plot.cohort <- c("NF","HL", "SN", "K", "NF","HL", "SN", "K")
+plot.names <- c("Fidalgo Bay","Dabob Bay", "Oyster Bay C1", "Oyster Bay  C2", "Fidalgo Bay","Dabob Bay", "Oyster Bay C1", "Oyster Bay  C2")
+plot.temps <- c("6","6","6","6","10","10","10","10")
+
+# check out colors for stage plots
+
+# c(lighten("#E2E6BD", amount = 0.1),  lighten("#EAAB28", amount = 0.3), lighten("#E78A38", amount = 0.3),lighten("#D33F6A", amount = 0.5), lighten("#DF6753", amount = 0.3), lighten("lightsalmon", amount = 0.3))
+# show_col(c('#f7f7f7','#cccccc','#969696','#636363','#252525'))
+show_col(c("#f7f7f7", "#67a9cf", "#d1e5f0","gray85", "#fddbc7","#ef8a62" ))
+
+pdf(file="Results/male-gonad-stage-by-cohort", height = 5.75, width = 7.6)
+par(mfrow=c(2,4), oma=c(5,5,0,2), mar=c(0,3,5,0), mgp=c(2.6,0.6,0))
+for (i in 1:8) {
+  barplot(t(prop.table(CT.malestage.pop[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+  title(plot.names[i], line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+  
+}
+mtext(side=1,text=(expression(paste(pCO[2], " treatment"))), outer=T,line=3.5, col="gray30", font=1, cex=1.1)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.2)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.7)
+mtext(side=2,text="6°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.7)
+mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.2)
+mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Male gamete stage by temperature, ", pCO[2], ", and cohort")))
+dev.off()
+
+
+pdf(file="Results/female-gonad-stage-by-cohort", height = 5.75, width = 7.6)
+par(mfrow=c(2,4), oma=c(5,5,0,2), mar=c(0,3,5,0), mgp=c(2.6,0.6,0))
+for (i in 1:8) {
+  barplot(t(prop.table(CT.femstage.pop[,,plot.cohort[i], plot.temps[i]], 1)), xlab=F, las=1, col=c("#f7f7f7", "#cccccc", "#636363", "#252525",  "#969696"), cex.lab=1.4, cex.axis = 1.2, col.axis = "gray30", col.lab = "gray30", legend.text = F)
+  title(plot.names[i], line = 1, cex.main=1.5, col.main = "gray30", font.main = 1)
+  
+}
+mtext(side=1,text=(expression(paste(pCO[2], " treatment"))), outer=T,line=3.5, col="gray30", font=1, cex=1.1)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.2)
+mtext(side=2,text="% Sampled", outer=T,line=0, col="gray30", font=1, cex=1, at=0.7)
+mtext(side=2,text="6°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.7)
+mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1.2, at=0.2)
+mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Female gamete stage by temperature, ", pCO[2], ", and cohort")))
+dev.off()
+
+# -------------
+
+
+# Examine within population (aka cohort) differences (not reported)
+
 CT.domsex.stage.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Dom.Stage.redo, Histology.prepH$POPULATION)
-chisq.test(CT.domsex.stage.pre, simulate.p.value = T, B = 10000) #10 vs. 6C: X-squared = 15.842 p=0.0026
+CT.malestage.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Male.Stage, Histology.prepH$POPULATION)
+CT.femstage.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Female.Stage, Histology.prepH$POPULATION)
+CT.sex.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Sex.redo, Histology.prepH$POPULATION)
+
 fisher.test(CT.domsex.stage.pre.pop[,,"NF"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.1347
 fisher.test(CT.domsex.stage.pre.pop[,,"HL"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.5044
 fisher.test(CT.domsex.stage.pre.pop[,,"SN"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.1968
 fisher.test(CT.domsex.stage.pre.pop[,,"K"], simulate.p.value = T, B = 10000) #10 vs. 6C FB -  0.0021
 
-CT.malestage.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Male.Stage)
-CT.malestage.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Male.Stage, Histology.prepH$POPULATION)
-chisq.test(CT.malestage.pre[,-1], simulate.p.value = T, B = 10000) #10 vs. 6C: 31.081, p-value = 9.999e-05
 fisher.test(CT.malestage.pre.pop[,-1,"NF"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.1025
 fisher.test(CT.malestage.pre.pop[,-1,"HL"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.05429
 fisher.test(CT.malestage.pre.pop[,-1,"SN"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.2695
 fisher.test(CT.malestage.pre.pop[,-1,"K"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - p=9.999e-05
 
-CT.femstage.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Female.Stage)
-CT.femstage.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Female.Stage, Histology.prepH$POPULATION)
-chisq.test(CT.femstage.pre[,-1], simulate.p.value = T, B = 10000) #10 vs. 6C: 2.1488 p-value = 0.669
 fisher.test(CT.femstage.pre.pop[,-1,"NF"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - p=1
 fisher.test(CT.femstage.pre.pop[,-1,"HL"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.2053
 fisher.test(CT.femstage.pre.pop[,-1,"SN"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.5977
 fisher.test(CT.femstage.pre.pop[,-1,"K"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - P=1
 
-CT.sex.pre <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Sex.redo)
-CT.sex.pre.pop <- table(Histology.prepH$TEMPERATURE, Histology.prepH$Sex.redo, Histology.prepH$POPULATION)
-chisq.test(CT.sex.pre, simulate.p.value = T, B = 10000) #10 vs. 6C: X-squared = 7.9551, p-value = 0.1634
 fisher.test(CT.sex.pre.pop[,,"NF"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.3182
 fisher.test(CT.sex.pre.pop[,,"HL"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.06819
 fisher.test(CT.sex.pre.pop[,,"SN"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - P=1
-fisher.test(CT.sex.pre.pop[,,"K"], simulate.p.value = T, B = 10000) #10 vs. 6C FB -0.209
+fisher.test(CT.sex.pre.pop[,,"K"], simulate.p.value = T, B = 10000) #10 vs. 6C FB - 0.209
 
-sum((CT.sex.pre)[1,])
-sum((CT.sex.pre)[2,])
+### ----- Test dominant sex's stage differences within cohorts aka populations
 
-# Compare 6-amb to 10-low ... do T/pH cancel? 
+# Fidalgo Bay 6C
+fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5854
+fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.1239
+fisher.test(CT.domsex.stage.pop[,,"NF", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.2677
 
-CT.domsex.stage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Dom.Stage.redo, Histology.Jan.redo$TEMPERATURE)
-chisq.test(rbind(CT.domsex.stage[3,,c("6")],CT.domsex.stage[2,,c("10")]), simulate.p.value = T, B=10000) #no diff. x=2.8185, p=0.63
+# Dabob Bay 6C
+fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5395
+fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.008799     # corrected (n = 4): 0.0352
+fisher.test(CT.domsex.stage.pop[,,"HL", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.7423
 
-CT.sex <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Sex.redo, Histology.Jan.redo$TEMPERATURE)
-chisq.test(rbind(CT.sex[3,,c("6")],CT.sex[2,,c("10")]), simulate.p.value = T, B=10000) # yes diff, X=11.7, p=0.037. 
+# Oyster Bay Cohort 1 6C
+fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; P=1
+fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.2458
+fisher.test(CT.domsex.stage.pop[,,"SN", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.1698
 
-CT.malestage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Male.Stage, Histology.Jan.redo$TEMPERATURE)
-chisq.test(rbind(CT.malestage[3,-1,c("6")],CT.malestage[2,-1,c("10")]), simulate.p.value = T, B=10000) # not diff. p=0.6495
+# Oyster Bay Cohort 2 6C
+fisher.test(CT.domsex.stage.pop[,,"K", "6"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.08539
+fisher.test(CT.domsex.stage.pop[,,"K", "6"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.002       # corrected (n=4): 0.008
+fisher.test(CT.domsex.stage.pop[,,"K", "6"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.005799        # corrected (n=4): 0.0232
 
-CT.femstage <- table(Histology.Jan.redo$PH, Histology.Jan.redo$Female.Stage, Histology.Jan.redo$TEMPERATURE)
-fisher.test(rbind(CT.femstage[3,-1,c("6")],CT.femstage[2,-1,c("10")]), simulate.p.value = T, B=10000) # not diff. p=0.7785
+# Fidalgo Bay 10C 
+fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5854     UPDATE! 0.013   # corrected (n=4): 0.0412
+fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.1239      UPDATE! 0.244
+fisher.test(CT.domsex.stage.pop[,,"NF", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.2677          UPDATE! 0.394
+
+# Dabob Bay 10C
+fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.5395     UPDATE! P=1
+fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.008799    UPDATE! P=0.0979
+fisher.test(CT.domsex.stage.pop[,,"HL", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.7423          UPDATE! P=0.253
+
+# Oyster Bay Cohort 1 10C
+fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; P=1
+fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.2458      UPDATE! P=0.410
+fisher.test(CT.domsex.stage.pop[,,"SN", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.1698          UPDATE! P=0.515
+
+# Oyster Bay Cohort 2 10C
+fisher.test(CT.domsex.stage.pop[,,"K", "10"][-1,], simulate.p.value = T, B = 10000) #ambient vs. low; 0.08539     UPDATE! P=0.127
+fisher.test(CT.domsex.stage.pop[,,"K", "10"][-2,], simulate.p.value = T, B = 10000) #pre to ambient; 0.002        UPDATE! P=0.068
+fisher.test(CT.domsex.stage.pop[,,"K", "10"][-3,], simulate.p.value = T, B = 10000) #pre to low; 0.005799         UPDATE! P=0.405
+
+# -----  Male gonad stage by each population
+
+# Fidalgo Bay
+fisher.test(CT.malestage.pop[,,"NF", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.8721
+fisher.test(CT.malestage.pop[,,"NF", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.6344
+fisher.test(CT.malestage.pop[,,"NF", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3057
+
+fisher.test(CT.malestage.pop[,,"NF", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.08619
+fisher.test(CT.malestage.pop[,,"NF", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.0292
+fisher.test(CT.malestage.pop[,,"NF", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.4235
+
+# Dabob Bay
+fisher.test(CT.malestage.pop[,,"HL", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.6294
+fisher.test(CT.malestage.pop[,,"HL", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.5834
+fisher.test(CT.malestage.pop[,,"HL", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3896
+
+fisher.test(CT.malestage.pop[,,"HL", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.4369
+fisher.test(CT.malestage.pop[,,"HL", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.1432
+fisher.test(CT.malestage.pop[,,"HL", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.06279
+
+# Oyster Bay Cohort 1
+fisher.test(CT.malestage.pop[,,"SN", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.07592
+fisher.test(CT.malestage.pop[,,"SN", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.05095
+fisher.test(CT.malestage.pop[,,"SN", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3357
+
+fisher.test(CT.malestage.pop[,,"SN", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.2256
+fisher.test(CT.malestage.pop[,,"SN", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.3593
+fisher.test(CT.malestage.pop[,,"SN", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; P=1
+
+# Oyster Bay Cohort 2
+fisher.test(CT.malestage.pop[,,"K", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.2776
+fisher.test(CT.malestage.pop[,,"K", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 2e-04
+fisher.test(CT.malestage.pop[,,"K", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.0009999
+
+fisher.test(CT.malestage.pop[,,"K", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.2839 
+fisher.test(CT.malestage.pop[,,"K", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.2776
+fisher.test(CT.malestage.pop[,,"K", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.8154
+
+# ---- Female gonad stage by each population
+
+# Fidalgo Bay
+fisher.test(CT.femstage.pop[,,"NF", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.042
+fisher.test(CT.femstage.pop[,,"NF", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.0021
+fisher.test(CT.femstage.pop[,,"NF", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.4875
+
+fisher.test(CT.femstage.pop[,,"NF", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; 0.042  UPDATE! P=1
+fisher.test(CT.femstage.pop[,,"NF", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.0396  UPDATE! P=0.00620
+fisher.test(CT.femstage.pop[,,"NF", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.4875      UPDATE! P=0.0228
+
+# Dabob Bay
+fisher.test(CT.femstage.pop[,,"HL", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1
+fisher.test(CT.femstage.pop[,,"HL", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.2118
+fisher.test(CT.femstage.pop[,,"HL", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.2198
+
+fisher.test(CT.femstage.pop[,,"HL", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1    UPDATE! P=0.683
+fisher.test(CT.femstage.pop[,,"HL", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.2118
+fisher.test(CT.femstage.pop[,,"HL", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.2198
+
+# Oyster Bay Cohort 1
+fisher.test(CT.femstage.pop[,,"SN", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1
+fisher.test(CT.femstage.pop[,,"SN", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.3147
+fisher.test(CT.femstage.pop[,,"SN", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3976
+
+fisher.test(CT.femstage.pop[,,"SN", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=1    UPDATE! P=0.565
+fisher.test(CT.femstage.pop[,,"SN", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.3147  UPDATE! P=1
+fisher.test(CT.femstage.pop[,,"SN", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.3976      UPDATE! P=0.631
+
+# Oyster Bay Cohort 2
+fisher.test(CT.femstage.pop[,,"K", "6"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=0.4685 UPDATE! P=0.270
+fisher.test(CT.femstage.pop[,,"K", "6"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.7263    UPDATE! P=1
+fisher.test(CT.femstage.pop[,,"K", "6"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.7153        UPDATE! P=0.285
+
+fisher.test(CT.femstage.pop[,,"K", "10"][-1,-1], simulate.p.value = T, B = 10000) #ambient vs. low; p=0.4685  UPDATE! P=0.806
+fisher.test(CT.femstage.pop[,,"K", "10"][-2,-1], simulate.p.value = T, B = 10000) #pre to ambient; 0.7263     UPDATE! P=1
+fisher.test(CT.femstage.pop[,,"K", "10"][-3,-1], simulate.p.value = T, B = 10000) #pre to low; 0.7153         UPDATE! P=1
+
+# --------- Compare sex within Populations 
+
+# FIDALGO BAY
+fisher.test(CT.sex.pop[,,"NF", "6"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=1
+fisher.test(CT.sex.pop[,,"NF", "6"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0979
+fisher.test(CT.sex.pop[,,"NF", "6"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.3576
+
+fisher.test(CT.sex.pop[,,"NF", "10"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.1327
+fisher.test(CT.sex.pop[,,"NF", "10"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0112
+fisher.test(CT.sex.pop[,,"NF", "10"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.0253
+
+# DABOB BAY
+fisher.test(CT.sex.pop[,,"HL", "6"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.6843
+fisher.test(CT.sex.pop[,,"HL", "6"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.3307
+fisher.test(CT.sex.pop[,,"HL", "6"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.1169
+
+fisher.test(CT.sex.pop[,,"HL", "10"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.8478
+fisher.test(CT.sex.pop[,,"HL", "10"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.1661
+fisher.test(CT.sex.pop[,,"HL", "10"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.6256
+
+# OYSTER BAY C1
+fisher.test(CT.sex.pop[,,"SN", "6"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.0428
+fisher.test(CT.sex.pop[,,"SN", "6"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0425
+fisher.test(CT.sex.pop[,,"SN", "6"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.95
+
+fisher.test(CT.sex.pop[,,"SN", "10"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.6281
+fisher.test(CT.sex.pop[,,"SN", "10"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.09919
+fisher.test(CT.sex.pop[,,"SN", "10"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.9007
+
+# OYSTER BAY C2
+fisher.test(CT.sex.pop[,,"K", "6"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.1778
+fisher.test(CT.sex.pop[,,"K", "6"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=0.0218
+fisher.test(CT.sex.pop[,,"K", "6"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.0195
+
+fisher.test(CT.sex.pop[,,"K", "10"][-1,], simulate.p.value = T, B = 10000) #sex btwn ambient and low pH: p=0.4568
+fisher.test(CT.sex.pop[,,"K", "10"][-2,], simulate.p.value = T, B = 10000) #sex btwn pre and ambient pH: p=1
+fisher.test(CT.sex.pop[,,"K", "10"][-3,], simulate.p.value = T, B = 10000) #sex btwn pre and low pH: p=0.6685
+
+
+
+
+# Plots showing gonad by pH treatment, both temps and all cohorts combined
+
+# Dominant sex's stage 
+print(barplot(t(prop.table(CT.domsex.stage, 1)), main="Gonad stage, all cohorts", xlab=(expression(paste(pCO[2], " treatment"))), ylab="% Sampled", las=1, col=c(lighten("#E2E6BD", amount = 0.1),  lighten("#EAAB28", amount = 0.3), lighten("#E78A38", amount = 0.3),lighten("#D33F6A", amount = 0.5), lighten("#DF6753", amount = 0.3), lighten("lightsalmon", amount = 0.3)),  cex.main=1.5, cex.lab=1.4, cex.axis = 1.3, cex.names = 1.3, col.axis = "gray30", col.lab = "gray30", col.main = "gray30", font.main = 1, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+# Female stage
+colnames(CT.femstage) <- c("None present (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+print(barplot(t(prop.table(CT.femstage, 1)), main="Female", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+
+# Male stage
+colnames(CT.malestage) <- c("None present (0)", "Early (1)", "Advanced (2)", "Ripe (3)", "Spawned/Regressing (4)")
+print(barplot(t(prop.table(CT.malestage, 1)), main="Male", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"), cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-.5, 0), title="Gonad Stage", cex=1.5)))
+
+#  Sex
+print(barplot(t(prop.table(CT.sex, 1)), main="Dominant gonad sex", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+
+
+print(barplot(t(prop.table(CT.malestage.pop[,,"NF"], 1)), main="Fidalgo Bay Male\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.malestage.pop[,,"HL"], 1)), main="Dabob Bay Male\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.malestage.pop[,,"SN"], 1)), main="Oyster Bay C1 Male\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.malestage.pop[,,"K"], 1)), main="Oyster Bay C2 Male\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+
+print(barplot(t(prop.table(CT.femstage.pop[,,"NF"], 1)), main="Fidalgo Bay Female\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.femstage.pop[,,"HL"], 1)), main="Dabob Bay Female\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.femstage.pop[,,"SN"], 1)), main="Oyster Bay C1 Female\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+print(barplot(t(prop.table(CT.femstage.pop[,,"K"], 1)), main="Oyster Bay C2 Female\npre- & post-PCO2 treatment", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("#E2E6BD",  "#EAAB28", "#E78A38","#D33F6A", "#DF6753", "lightsalmon"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = F, args.legend = list(x = "topright", bty = "n", inset=c(-1.5, 0), title="Gonad Stage", cex=1.5)))
+
+# Barplots of sex for each cohort
+
+pdf(file="Results/6C-gonad-sex-FB", height = 6.5, width = 4.5)
+print(barplot(t(prop.table(CT.sex.pop[,,"NF", "6"], 1)), main="Fidalgo Bay", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+dev.off()
+
+pdf(file="Results/6C-gonad-sex-DB", height = 6.5, width = 4.5)
+print(barplot(t(prop.table(CT.sex.pop[,,"HL", "6"], 1)), main="Dabob Bay", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+dev.off()
+
+pdf(file="Results/6C-gonad-sex-OB1", height = 6.5, width = 4.5)
+print(barplot(t(prop.table(CT.sex.pop[,,"SN", "6"], 1)), main="Oyster Bay C1", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+dev.off()
+
+pdf(file="Results/6C-gonad-sex-OB2", height = 6.5, width = 4.5)
+print(barplot(t(prop.table(CT.sex.pop[,,"K", "6"], 1)), main="Oyster Bay C2", xlab="PCO2 Treatment", ylab="% Sampled", las=1, col=c("gray75",  "royalblue3", "mediumpurple3", "purple3","mediumorchid3", "hotpink2"),  cex.main=1.7, cex.lab=1.5, cex.axis = 1.3, cex.names = 1.3, legend.text = T, args.legend = list(x = "topright", bty = "n", inset=c(-1, 0), title="Gonad Stage", cex=1.5)))
+dev.off()
+
+
+# --- Some summary statistics 
 
 # How many females in stage 2 or 3, both sampling? 
+nrow(subset(Histology.Jan.redo, (Female.Stage==2 | Female.Stage==3) & SAMPLING=="FEBRUARY"))/nrow(subset(Histology.Jan.redo, SAMPLING=="FEBRUARY")) 
+#24.1%, from 108 oysters 
 
-nrow(subset(Histology.Jan.redo, (Female.Stage==2 | Female.Stage==3) & SAMPLING=="FEBRUARY"))/nrow(subset(Histology.Jan.redo, SAMPLING=="FEBRUARY")) #24.1%, from 108 oysters 
+nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) 
+#15.4% of oysters have stage 3 female gametes, from April sampling of 156 oysters 
 
-nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) #15.4% of oysters have stage 3 female gametes, from April sampling of 156 oysters 
+nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL" & PCO2=="High"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL" & PCO2=="LOW")) 
+#14.1% of low pH treated oysters have stage 3 female gametes  (n=78 sampled)
 
-nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL" & PH=="LOW"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL" & PH=="LOW")) #14.1% of low pH treated oysters have stage 3 female gametes  (n=78 sampled)
+nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL" & PCO2=="Ambient"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL" & PCO2=="Ambient")) 
+#16.7% of ambient pH treated oysters have stage 3 female gametes  (n=78 sampled)
 
-nrow(subset(Histology.Jan.redo, Female.Stage==3 & SAMPLING=="APRIL" & PH=="AMBIENT"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL" & PH=="AMBIENT")) #16.7% of ambient pH treated oysters have stage 3 female gametes  (n=78 sampled)
-
-nrow(subset(Histology.Jan.redo, Female.Stage==2 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) #23.7% of oysters have stage 2 female gametes, from April sampling of 156 oysters 
+nrow(subset(Histology.Jan.redo, Female.Stage==2 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) 
+#23.7% of oysters have stage 2 female gametes, from April sampling of 156 oysters 
 
 # How many males in stage 2 or 3, both sampling? 
-nrow(subset(Histology.Jan.redo, (Male.Stage==2 | Male.Stage==3) & SAMPLING=="FEBRUARY"))/nrow(subset(Histology.Jan.redo, SAMPLING=="FEBRUARY")) #45.4%, from 108 oysters 
+nrow(subset(Histology.Jan.redo, (Male.Stage==2 | Male.Stage==3) & SAMPLING=="FEBRUARY"))/nrow(subset(Histology.Jan.redo, SAMPLING=="FEBRUARY")) 
+#45.4%, from 108 oysters 
 
-nrow(subset(Histology.Jan.redo, Male.Stage==2 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) #26.3% of oysters have stage 2 or stage 3 male gametes, from April sampling of 156 oysters 
+nrow(subset(Histology.Jan.redo, Male.Stage==2 & SAMPLING=="APRIL"))/nrow(subset(Histology.Jan.redo, SAMPLING=="APRIL")) 
+#26.3% of oysters have stage 2 or stage 3 male gametes, from April sampling of 156 oysters 
 
-nrow(subset(Histology.Jan.redo, Male.Stage==3 & PH=="AMBIENT"))/nrow(subset(Histology.Jan.redo, PH=="AMBIENT")) #24.4% of oysters have stage 3 male gametes, from April sampling of 156 oysters 
+nrow(subset(Histology.Jan.redo, Male.Stage==3 & PCO2=="Ambient"))/nrow(subset(Histology.Jan.redo, PCO2=="Ambient")) 
+#24.4% of oysters have stage 3 male gametes, from April sampling of 156 oysters 
 
 summary(Histology.Jan.redo$Sex.redo)/264
 
-# Compare sex ratios between populations ... all treatments combined! 
-CT.sex.pop.allph <- t(table(Histology.Jan.redo$Sex.redo, Histology.Jan.redo$POPULATION))
-chisq.test(CT.sex.pop.allph, simulate.p.value = T, B=10000) #very sign. 
-pairwiseNominalIndependence(CT.sex.pop.allph, fisher=FALSE, gtest=FALSE, chisq=TRUE,  method="fdr", simulate.p.value=T)
 
+# % sexes by population
 round(100*CT.sex.pop.allph/rowSums(CT.sex.pop.allph), digits = 1) # of each % sex of ALL sampled oysters within pops 
 
 # % female or hpf 
@@ -416,4 +608,9 @@ round(100*CT.sex.pop.allph/rowSums(CT.sex.pop.allph), digits = 1) # of each % se
 41.1+27.8   #K 69%
 28.8+30.3  #NF 59%
 15.2+13.6 #SN 29%
+
+
+
+
+
 

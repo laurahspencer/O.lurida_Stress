@@ -129,6 +129,14 @@ ggplot(Survival.set, aes(x=pH, y=survival.setters, col=pH)) + geom_boxplot() +
   scale_color_manual(values=c('gray25', 'gray25'), guide=FALSE) + scale_shape_discrete(name  =NULL, breaks=c(6, 10), labels=c("Chilled", "Unchilled"))
 
 
+# Jitter / boxplot with symbols for temperature 
+ggplot(Survival.set, aes(x=pH, y=survival.setters, col=pH)) + geom_boxplot() +
+  geom_jitter(stat="identity", width = 0.2, size=4) +
+  labs(title="Cumulative % Survival\nNew Larvae to Eyed Larvae") + xlab("Parental pH") + ylab("% Survival") +
+  theme_bw(base_size = 18) + 
+  theme(plot.title = element_text(face = 'bold',size = 16, hjust = 0, color="gray32"),  panel.border = element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(), axis.line=element_line(colour="gray32"),  axis.title.x = element_text(color="gray32"), axis.title.y = element_text(color="gray32"), legend.position="bottom", legend.background = element_rect(color = NULL, fill = NULL, linetype = NULL),  legend.key.size = unit(1.5, 'lines'), legend.text = element_text(colour="gray32")) + 
+  scale_color_manual(values=c('gray40', 'steelblue'), guide=FALSE)
+
 
 
 

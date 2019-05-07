@@ -119,6 +119,10 @@ summary(lm(survival.t ~ expected + factor(Population), data=Bucket.Densities.wid
 aggregate(survival ~ Population, data=Bucket.Densities.wide, mean) 
 aggregate(expected ~ Population, data=Bucket.Densities.wide, sd) 
 
+aggregate(survival ~ Temperature+pH, data=Bucket.Densities.wide, mean) 
+aggregate(survival ~ Temperature+pH, data=Bucket.Densities.wide, sd) 
+
+View(Bucket.Densities.wide)
 plot(x=Bucket.Densities.wide$Population, y=Bucket.Densities.wide$survival.t)
 # ------- Compare % larval survival between biweekly screenings, using # larvae stocked (included new larvae added), and # larvae counted. Remember: 224um larvae were counted, but then removed from the larval buckets. 
 
@@ -153,6 +157,10 @@ survival.biweekly <- subset(Bucket.Densities.wide, (survival.t!= "NA" & survival
 # Compare % survival (sqrt-asin transformed) between chilled/unchiled (temperature) and pH treatment groups 
 anova(biweekly.lm <- aov(survival.t ~ pH, data=survival.biweekly)) #population dff
 TukeyHSD(biweekly.lm <- aov(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) #population dff
+
+aggregate(survival ~ Temperature+pH, data=survival.biweekly, mean)
+aggregate(survival ~ Temperature+pH, data=survival.biweekly, sd)
+View(survival.biweekly)
 
 
 plot(biweekly.lm$residuals) #look good 

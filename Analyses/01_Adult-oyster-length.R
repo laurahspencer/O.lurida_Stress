@@ -28,7 +28,7 @@ shapiro.test(subset(broodstock.length, Population=="K")$Length)
 # Temp or Pop diff before pH treatmemt?
 summary(aov(Length ~ Population*Temperature, data=subset(broodstock.length, pH=="Pre-pH")))
 summary(aov(Length ~ Population, data=subset(broodstock.length, pH=="Pre-pH")))
-TukeyHSD(aov(Length ~ Population, data=subset(broodstock.length, pH=="Pre-pH"))) # NF > HL only 
+TukeyHSD(aov(Length ~ Population, data=subset(broodstock.length, pH=="Pre-pH" & Population!="K"))) # NF > HL only 
 
 # Temp or Pop diff after pH treatmemt?
 summary(aov(Length ~ Population*pH, data=subset(broodstock.length, pH!="Pre-pH" & Population!="K")))
@@ -77,7 +77,7 @@ aggregate(Length ~ Population + pH + Temperature, broodstock.length, mean)
 broodstock.length$pH <- factor(broodstock.length$pH, levels = c("Pre-pH",  "Low", "Ambient"))
 broodstock.length$Population <- factor(broodstock.length$Population, levels = c("K", "HL", "NF", "SN"))
 broodstock.length$Temperature <- factor(broodstock.length$Temperature, levels = c(6, 10))
-brood.col.lengths <- c("gray50","lightsteelblue", "gray90")[as.numeric(broodstock.length$pH)]
+brood.col.lengths <- c("white","gray55","gray85")[as.numeric(broodstock.length$pH)]
 names(brood.col.lengths) <-broodstock.length$pH
 
 pdf(file="Results/broodstock-lengths-6.pdf", width=6.5, height = 3)
@@ -95,10 +95,9 @@ ggplot(subset(broodstock.length, Temperature==10), aes(x=Population, y= Length, 
   theme(plot.title = element_text(face = 'bold',size = 14, hjust = 0, colour = "gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_fill_manual(values=brood.col.lengths, name="pH treatment")+ scale_x_discrete(labels = c('Oyster Bay C2','Dabob Bay','Fidalgo Bay', "Oyster Bay C1")) + scale_y_continuous(limits=c(min=min(broodstock.length$Length),max=max(broodstock.length$Length))) 
 dev.off()
 
-
-pdf(file="Results/broodstock-lengths.pdf", width=5.5, height = 4.5)
-ggplot(broodstock.length, aes(x=Population, y= Length, fill=pH)) +  geom_boxplot() + 
-  labs(title="Shell length by population, pH",y=expression("Shell length (mm)")) + 
+pdf(file="Results/broodstock-lengths.pdf", width=5, height = 5)
+ggplot(subset(broodstock.length, Population!="K"), aes(x=Population, y= Length, fill=pH)) +  geom_boxplot() + 
+  geom_point(size=1.25, position=position_jitterdodge(jitter.width = 0.18, jitter.height = 0, dodge.width = 0.75),aes(group=pH)) + labs(title=(expression(paste("Shell length by cohort, ", pCO[2], " exposure"))), y=expression("Shell length (mm)")) + 
   theme_bw(base_size = 12) + 
-  theme(plot.title = element_text(face = 'bold',size = 14, hjust = 0, colour = "gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), legend.position="bottom") +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_fill_manual(values=brood.col.lengths, name="pH treatment")+ scale_x_discrete(labels = c('Oyster Bay C2','Dabob Bay','Fidalgo Bay', "Oyster Bay C1")) + scale_y_continuous(limits=c(min=min(broodstock.length$Length),max=max(broodstock.length$Length)))
+  theme(plot.title = element_text(size = 14, hjust = 0, colour = "gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), legend.position="bottom") +  geom_vline(xintercept = c(1.5, 2.5), colour="gray") + scale_fill_manual(values=brood.col.lengths, name=element_blank(), labels = c(expression(pre-pCO[2]), expression(High-pCO[2]), expression(Ambient-pCO[2])))+ scale_x_discrete(labels = c('Dabob Bay','Fidalgo Bay', "Oyster Bay C1")) + scale_y_continuous(limits=c(min=min(subset(broodstock.length, Population!="K")$Length),max=max(subset(broodstock.length, Population!="K")$Length)))
 dev.off()

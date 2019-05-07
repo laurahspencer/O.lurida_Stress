@@ -1,6 +1,6 @@
 library(reshape2)
 library(plyr)
-
+View(Deploy.data)
 Deploy.data <- read.csv("Data/2018-Deployment-Data.csv", header=T, na.strings = c("NA", "?", "Unknown", "TBD"))
 Deploy.data <- subset(Deploy.data, SURVIVED != "NA")
 Deploy.data$BAY <- droplevels(Deploy.data$BAY)
@@ -12,20 +12,17 @@ Deploy.data$HAB.PH <- droplevels(Deploy.data$HAB.PH)
 Deploy.data$POP.PH.HAB <- droplevels(Deploy.data$POP.PH.HAB)
 aggregate(DEPLOYED ~ POPULATION + PH, Deploy.data, mean) #number deployed in each group
 
-# Compare survival between habitats overall
+# Compare survival 
 
-anova(glm.outplant1 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY, data=Deploy.data, binomial), test="Chi") # survival differed between bays. Should include as random effect. 
-anova(glm.outplant2 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION, data=Deploy.data, binomial), test="Chi") # survival differed between population. Should include as random effect. 
+# ONE BIG MODEL 
+anova(glm.outplant1 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION*BAY*PH, data=Deploy.data, binomial), test="Chi") 
 
-Deploy.data$POPULATION <- relevel(Deploy.data$POPULATION, ref = "HC")
-summary(glm.outplant2 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION, data=Deploy.data, binomial), test="Chi") # survival differed between population. Should include as random effect. 
-
+# EACH FACTOR SEPARATELY 
+anova(glm.outplant2 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION, data=Deploy.data, binomial), test="Chi") 
+anova(glm.outplant1 <- glm(cbind(SURVIVED, DEPLOYED) ~ BAY, data=Deploy.data, binomial), test="Chi")
+anova(glm.outplant1 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH, data=Deploy.data, binomial), test="Chi")
 anova(glm.outplant3 <- glm(cbind(SURVIVED, DEPLOYED) ~ HABITAT, data=Deploy.data, binomial), test="Chi") # survival did not differ between habitats 
-anova(glm.outplant4 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH, data=Deploy.data, binomial), test="Chi") # survival differed by parental pH 
-anova(glm.outplant5 <- glm(cbind(SURVIVED, DEPLOYED) ~ SIZE, data=Deploy.data, binomial), test="Chi") # survival differed by size category, can include as random effect 
 
-Anova(glm.outplant6 <- glmer(cbind(SURVIVED, DEPLOYED) ~ PH*HABITAT + (1|POPULATION/BAY), data=Deploy.data, binomial), test="Chi")  # what I really care about - ph and habitat 
-plot(glm.outplant6)
 
 Anova(glm.outplant6.noFB <- glmer(cbind(SURVIVED, DEPLOYED) ~ PH*HABITAT + (1|POPULATION/BAY), data=Deploy.data, binomial), test="Chi")  # pH and Habitat
 
@@ -53,6 +50,8 @@ Anova(glm.outplant11 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH, data=subset(Deploy.d
 Anova(glm.outplant11 <- glm(cbind(SURVIVED, DEPLOYED) ~ PH, data=subset(Deploy.data, BAY=="SK" & POPULATION=="SSF2"), binomial))  #NO
 
 Anova(glm.outplant11 <- glm(cbind(SURVIVED, DEPLOYED) ~ POPULATION*PH, data=subset(Deploy.data, BAY=="FB"), binomial))  #YES
+
+
 
 
 Deploy.data$perc.surv <- Deploy.data$SURVIVED/Deploy.data$DEPLOYED
@@ -142,7 +141,7 @@ Deploy.data$HAB.PH <- as.factor(Deploy.data$HAB.PH)
 
 ###### --------- GOOD PLOTS ---------- ########### 
 # survival by population and pH - did survival correlate with parental pH consistently across populations? 
-deploy.col <- c("gray90", "lightsteelblue3")[as.numeric(Deploy.data$PH)]
+deploy.col <- c("gray85", "gray55")[as.numeric(Deploy.data$PH)]
 names(deploy.col) <- Deploy.data$PH
 
 # Plot survival by population and parental pH
@@ -172,36 +171,51 @@ dev.off()
 
 Deploy.data$POPULATION <- factor(Deploy.data$POPULATION, levels=c("FB", "HC", "SSF1", "SSF2"))
 
+
 #  Bay specific deployment locations 
 
-pdf(file="Results/deployment-survival-FB.pdf", width=6, height = 3)
-ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="FB"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), col=PH, size=sqrt(DEPLOYED))) + geom_jitter() + 
+pdf(file="Results/deployment-survival-FB.pdf", width=6.5, height = 3.5)
+ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="FB"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) + geom_boxplot() +
+  geom_point(position=position_jitterdodge(jitter.width = 0.27, jitter.height = 0, dodge.width = 0.75),aes(group=PH)) +
   labs(title="Fidalgo Bay",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 11) + 
-  theme(plot.title = element_text(size = 14, hjust = 0, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pH") + scale_x_discrete(labels = c('Fidalgo Bay','Dabob Bay', "Oyster Bay C1", 'Oyster Bay C2'))
+  theme_bw(base_size = 12) + 
+  theme(plot.title = element_text(size = 14, hjust = 0, vjust=-0.6, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "none", axis.title.y = element_text(colour = "gray30", size=12)) + geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pCO2", labels = c("Ambient", "High")) + scale_x_discrete(labels = element_blank())
 dev.off()
 
-pdf(file="Results/deployment-survival-PG.pdf", width=6, height = 3)
-ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="PG"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), col=PH, size=sqrt(DEPLOYED))) + geom_jitter() + 
+pdf(file="Results/deployment-survival-PG.pdf", width=6.5, height = 3.5)
+ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="PG"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) + geom_boxplot() + 
+  geom_point(position=position_jitterdodge(jitter.width = 0.27, jitter.height = 0, dodge.width = 0.75),aes(group=PH)) +
   labs(title="Port Gamble Bay",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 11) + 
-  theme(plot.title = element_text(size = 14, hjust = 0, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pH") + scale_x_discrete(labels = c('Fidalgo Bay','Dabob Bay', "Oyster Bay C1", 'Oyster Bay C2'))
+  theme_bw(base_size = 12) + 
+  theme(plot.title = element_text(size = 14, hjust = 0, vjust=-0.6, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "none", axis.title.y = element_text(colour = "gray30", size=12)) + geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pCO2", labels = c("Ambient", "High")) + scale_x_discrete(labels = element_blank())
 dev.off()
 
-pdf(file="Results/deployment-survival-SK.pdf", width=6, height = 3)
-ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="SK"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), col=PH, size=DEPLOYED)) + geom_jitter() + 
+pdf(file="Results/deployment-survival-SK.pdf", width=6.5, height = 3.5)
+ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="SK"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) + geom_boxplot() + 
+  geom_point(position=position_jitterdodge(jitter.width = 0.27, jitter.height = 0, dodge.width = 0.75),aes(group=PH)) +
   labs(title="Skokomish River Delta",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 11) + 
-  theme(plot.title = element_text(size = 14, hjust = 0, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pH") + scale_x_discrete(labels = c('Fidalgo Bay','Dabob Bay', "Oyster Bay C1", 'Oyster Bay C2'))
+  theme_bw(base_size = 12) + 
+  theme(plot.title = element_text(size = 14, hjust = 0, vjust=-0.6, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "none", axis.title.y = element_text(colour = "gray30", size=12)) + geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pCO2", labels = c("Ambient", "High")) + scale_x_discrete(labels = element_blank())
 dev.off()
 
-pdf(file="Results/deployment-survival-CI.pdf", width=6, height = 3)
-ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="CI"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), col=PH, size=DEPLOYED)) + geom_jitter() + 
+pdf(file="Results/deployment-survival-CI.pdf", width=6.6, height = 3.5)
+ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="CI"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) + geom_boxplot() + 
+  geom_point(position=position_jitterdodge(jitter.width = 0.27, jitter.height = 0, dodge.width = 0.75),aes(group=PH)) +
   labs(title="Case Inlet",y=expression("Percent Survival")) + 
-  theme_bw(base_size = 11) + 
-  theme(plot.title = element_text(size = 16, hjust = 0, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank()) +  geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name="Parental pH") + scale_x_discrete(labels = c('Fidalgo Bay','Dabob Bay', "Oyster Bay C1", 'Oyster Bay C2'))
+  theme_bw(base_size = 12) + 
+  theme(plot.title = element_text(size = 14, hjust = 0, vjust=-0.6, colour="gray30"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), legend.text=element_text(size=14, colour = "gray30"), legend.title=element_text(size=14, colour = "gray30"), axis.title.y = element_text(colour = "gray30", size=12), legend.position="bottom") + geom_vline(xintercept = c(1.5, 2.5, 3.5), colour="gray") + scale_color_manual(values=deploy.col) + scale_fill_manual(values=deploy.col, name=(expression(paste("Parental ", pCO[2]))), labels = c("Ambient", "High")) + scale_x_discrete(labels = c('Fidalgo Bay','Dabob Bay', "Oyster Bay C1", 'Oyster Bay C2'))
 dev.off()
 
+# plot for title 
+pdf(file="Results/deployment-survival-plot-title.pdf", width=6.6, height = 3.5)
+ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="CI"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) + geom_boxplot() + 
+  labs(title=expression(paste("Survival by bay, cohort and parental ", pCO[2], " exposure"))) + 
+  theme_bw(base_size = 12) + 
+  theme(plot.title = element_text(size = 16, hjust = 0, vjust=2, colour="gray30"))
+dev.off()
+
+
+## -----------
 
 pdf(file="Results/deployment-survival-FB-habs.pdf", width=7, height = 3)
 ggplot(subset(Deploy.data, HAB.PH !="NA" & BAY=="FB"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=HAB.PH)) +  geom_boxplot() + 
@@ -251,8 +265,6 @@ for (i in 1:4) {
 }
 
 
-
-View(Deploy.data)
 
 
 ggplot(subset(Deploy.data, HAB.PH !="NA"), aes(x=POPULATION, y= 100*(SURVIVED/DEPLOYED), fill=PH)) +

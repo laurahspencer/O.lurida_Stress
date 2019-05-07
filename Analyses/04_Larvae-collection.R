@@ -192,8 +192,13 @@ summary(test1 <- aov(total.percap ~ pH*Groups, data=subset(spawning_group_sum, T
 # mean larvae per broodstock
 summary(test1 <- aov(mean.percap ~Population*pH*Temperature, data=spawning_group_sum))
 TukeyHSD(test1 <- aov(mean.percap ~Population*pH*Temperature, data=spawning_group_sum))
+
+summary(test1 <- aov(mean.percap ~Population + pH:Temperature, data=spawning_group_sum))
+TukeyHSD(test1 <- aov(mean.percap ~Population + pH:Temperature, data=spawning_group_sum))
+
 summary(test1 <- aov(mean.percap ~Population*pH*Temperature, data=subset(spawning_group_sum, Population!="K")))
 TukeyHSD(test1 <- aov(mean.percap ~Population*pH*Temperature, data=subset(spawning_group_sum, Population!="K")))
+
 
 # summary(test2 <- aov(mean.percap ~Population*pH*Temperature - pH - Population:pH -Population:Temperature, data=spawning_group_sum))
 # summary(test3 <- aov(mean.percap ~Population+Temperature+pH:Temperature, data=spawning_group_sum))
@@ -244,6 +249,9 @@ TukeyHSD(test3)
 # Timing- first big release (>10k)
 summary(aov(first.big ~ Population*Temperature*pH, data=spawning_group_sum))
 TukeyHSD(aov(first.big ~ Population*Temperature*pH, data=spawning_group_sum))$`Population:pH`
+
+summary(aov(first.big ~ Temperature, data=spawning_group_sum))
+
 
 aggregate(first.big ~ Groups, data=spawning_group_sum, mean)
 145.8-135.9
