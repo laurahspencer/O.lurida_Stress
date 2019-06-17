@@ -321,6 +321,11 @@ mtext(side=2,text="10°C Treatment", outer=T,line=2, col="gray30", font=3, cex=1
 mtext(side=3,outer=T,line=-2, col="gray30", font=3, cex=1.2, text=expression(paste("Female gamete stage by temperature, ", pCO[2], ", and cohort")))
 dev.off()
 
+
+
+
+
+
 # -------------
 
 

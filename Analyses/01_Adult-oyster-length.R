@@ -17,8 +17,11 @@ hist(broodstock.length$Length)
 summary(aov(Length ~ Population*Temperature*pH, data=broodstock.length))
 summary(aov(Length ~ Population*pH, data=broodstock.length))
 TukeyHSD(aov(Length ~ Population*pH, data=broodstock.length))
-summary(aov(Length ~ Population*pH, data=subset(broodstock.length, pH!="PRE")))
+summary(aov(Length ~ Population*pH, data=subset(broodstock.length, pH!="PRE" & Population!="K")))
+
 summary(aov(Length ~ Population*Temperature*pH, data=subset(broodstock.length, pH!="PRE")))
+
+
 
 shapiro.test(subset(broodstock.length, Population=="NF")$Length)
 shapiro.test(subset(broodstock.length, Population=="HL")$Length)
@@ -49,15 +52,15 @@ aggregate(Length ~ Population+pH, data=subset(broodstock.length, pH!="Ambient"),
 aggregate(Length ~ pH, data=subset(broodstock.length, Population!="K"), mean) # mean lengths for F1 oysters 
 aggregate(Length ~ pH, data=subset(broodstock.length, Population=="K"), mean) # mean lengths for OB-F2 oysters (weird- shrank?)
   
-
-
+# Grew in AMB pH, each cohort?
 shapiro.test(subset(broodstock.length, pH!="Low" & Population=="NF")$Length) #OK
-summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Low" & Population=="NF"))) #YES, but after p-adj, no
+summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Low" & Population=="NF"))) #YES
+0.0472*4 #correct p
 shapiro.test(subset(broodstock.length, pH!="Low" & Population=="HL")$Length) #OK
 summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Low" & Population=="HL"))) #NO 
 shapiro.test(subset(broodstock.length, pH!="Low" & Population=="SN")$Length) #OK
 summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Low" & Population=="SN"))) #YES
-0.00297*4 #p-adj
+0.00297*4 #correct p
 shapiro.test(subset(broodstock.length, pH!="Low" & Population=="K")$Length) #NO
 kruskal.test(x = subset(broodstock.length, pH!="Pre-pH" & Population=="K")$Length, g = subset(broodstock.length, pH!="Ambient" & Population=="K")$Length) #NO
 
@@ -70,6 +73,7 @@ shapiro.test(subset(broodstock.length, pH!="Ambient" & Population=="SN")$Length)
 summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Ambient" & Population=="SN"))) #NO
 shapiro.test(subset(broodstock.length, pH!="Ambient" & Population=="K")$Length) #OK
 summary(aov(Length ~ pH*Temperature, data=subset(broodstock.length, pH!="Ambient" & Population=="K"))) #YES, but after p-adj, no
+summary(aov(Length ~ pH, data=subset(broodstock.length, pH!="Ambient" & Population=="NF" | Population=="SN"))) #SN & NF pops yes
 
 
 aggregate(Length ~ Population + pH + Temperature, broodstock.length, mean)

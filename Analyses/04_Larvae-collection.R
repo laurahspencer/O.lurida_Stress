@@ -221,107 +221,101 @@ anova(test4, test5) # without K, differences
 TukeyHSD(test4)
 summary(test4)
 
-# running cumulative larvae, which incorporates timing of release 
-summary(test1 <- aov(log(cum.total+1) ~ Population*Temperature*pH, data=spawning_group_total))
-summary(test2 <- aov(log(cum.total+1) ~ Population*Temperature*pH-pH-Temperature-pH:Temperature-pH:Population, data=spawning_group_total))
-summary(test3 <- aov(log(cum.total+1) ~ Population*Temperature, data=spawning_group_total))
-summary(test4 <- aov(log(cum.total+1) ~ Population + Population:Temperature, data=spawning_group_total))
-summary(test5 <- aov(log(cum.total+1) ~ Population, data=spawning_group_total))
-AIC(test1, test2, test3, test4, test5)
-anova(test4, test5) #yes diff, test4 better (smaller residual sum sq)
-anova(test4, test1) 
-TukeyHSD(test4)
-summary(aov(log(cum.total+1) ~ Population+Population:Temperature, data=subset(spawning_group_total, Population!="K")))
-TukeyHSD(aov(log(cum.total+1) ~ Population+Population:Temperature, data=subset(spawning_group_total, Population!="K")))
-
 # running cumulative larvae per broodstock*length, which incorporates timing of release 
-summary(test1 <- aov(log(cum.percap+1) ~ Population*Temperature*pH, data=spawning_group_total))
-TukeyHSD(test1 <- aov(log(cum.percap+1) ~ Population*Temperature*pH, data=spawning_group_total))
+anova(cumu1 <- lm(log(cum.percap+1) ~ Population*Temperature*pH, data=spawning_group_total))
+anova(cumu2 <- lm(log(cum.percap+1) ~ Population*Temperature*pH-pH, data=spawning_group_total))
+anova(cumu3 <- lm(log(cum.percap+1) ~ Population*Temperature*pH-pH-Temperature:pH, data=spawning_group_total))
+anova(cumu4 <- lm(log(cum.percap+1) ~ Population*Temperature*pH-pH-Temperature:pH-Population:pH, data=spawning_group_total))
+anova(cumu5 <- lm(log(cum.percap+1) ~ Population*Temperature, data=spawning_group_total))
+anova(cumu6 <- lm(log(cum.percap+1) ~ Population+Population:Temperature, data=spawning_group_total)) #Lowest AIC + most parsimoneous
+AIC(cumu1,cumu2,cumu3,cumu4,cumu5,cumu6)
 
+# Response: log(cum.percap + 1)
+#                             Df  Sum Sq Mean Sq F value  Pr(>F)  
+# Population                  3  13.387  4.4625  2.8575 0.03840 *
+# Population:Temperature      4  19.299  4.8247  3.0895 0.01717 *
 
-summary(test2 <- aov(log(cum.percap+1) ~ Population*Temperature, data=spawning_group_total))
-summary(test3 <- aov(log(cum.percap+1) ~ Population + Population:Temperature, data=spawning_group_total))
-summary(test4 <- aov(log(cum.percap+1) ~ Population, data=spawning_group_total))
-AIC(test1, test2, test3, test4)
-anova(test3, test4) #yes diff, test3 better (smaller residual sum sq)
-TukeyHSD(test3)
+TukeyHSD(test1 <- aov(log(cum.percap+1) ~ Population+Population:Temperature, data=spawning_group_total))
+# Significant  = NF-K; K10-NF:6; K:10-HL:10
+
 
 # Timing- first big release (>10k)
-summary(aov(first.big ~ Population*Temperature*pH, data=spawning_group_sum))
-TukeyHSD(aov(first.big ~ Population*Temperature*pH, data=spawning_group_sum))$`Population:pH`
+anova(big1 <- lm(first.big ~ Population*Temperature*pH, data=spawning_group_sum))
+anova(big2 <- lm(first.big ~ Population*Temperature+Population:pH+Temperature:pH+Population:Temperature+pH:Population:Temperature, data=spawning_group_sum))
+anova(big3 <- lm(first.big ~ Population+Temperature+Population:pH+Temperature:pH+pH:Population:Temperature, data=spawning_group_sum))
+anova(big4 <- lm(first.big ~ Population+Temperature+Population:pH+pH:Population:Temperature, data=spawning_group_sum))
+anova(big5 <- lm(first.big ~ Population+Temperature+Population:pH, data=spawning_group_sum))
+anova(big6 <- lm(first.big ~ Population+Temperature, data=spawning_group_sum))
+AIC(big1, big2, big3, big4, big5, big6) 
+summary(big3) #most parsimoneous
 
-summary(aov(first.big ~ Temperature, data=spawning_group_sum))
-
+# Response: first.big
+#                            Df Sum Sq Mean Sq F value   Pr(>F)   
+# Population                 3 606.71 202.236 15.0501 0.001184 ** <--- sign. 
+# Temperature                1 160.17 160.167 11.9194 0.008664 ** <--- sign.
+# Population:pH              4 185.38  46.344  3.4488 0.064106 . 
+# Temperature:pH             1  10.67  10.667  0.7938 0.398956   
+# Population:Temperature:pH  6 218.92  36.486  2.7152 0.096234 . 
+# Residuals                  8 107.50  13.437                    
 
 aggregate(first.big ~ Groups, data=spawning_group_sum, mean)
 145.8-135.9
 
-# summary(aov(first.big ~ Population*Temperature, data=spawning_group_sum))
-# summary(aov(first.big ~ Population+Temperature, data=spawning_group_sum))
-# summary(aov(first.big ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# TukeyHSD(aov(first.big ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# summary(aov(first.big ~ Population*pH, data=subset(spawning_group_sum, Temperature==10)))
-
 # Day of maximum release
-summary(test1 <- aov(maxday ~ Population*Temperature*pH, data=spawning_group_sum)) 
-summary(test2 <- aov(maxday ~ Temperature*pH, data=spawning_group_sum)) 
-summary(test3 <- aov(maxday ~ Population*pH, data=spawning_group_sum)) 
-summary(test4 <- aov(maxday ~ Temperature, data=spawning_group_sum)) 
-summary(test5 <- aov(maxday ~ pH, data=spawning_group_sum)) 
-AIC(test1, test2, test3, test4, test5)
-anova(test1,test4) #simplest best 
-TukeyHSD(test4)
+anova(max1 <- aov(maxday ~ Population*Temperature*pH, data=spawning_group_sum)) 
+anova(max2 <- aov(maxday ~ Population*Temperature*pH - Population:pH, data=spawning_group_sum)) 
+anova(max3 <- aov(maxday ~ Population*Temperature*pH - Population:pH - Population:Temperature:pH, data=spawning_group_sum)) 
+anova(max4 <- aov(maxday ~ Population*Temperature*pH - Population:pH - Population:Temperature:pH- Population:Temperature, data=spawning_group_sum)) 
+anova(max5 <- aov(maxday ~ Population+Temperature+pH, data=spawning_group_sum)) 
+anova(max6 <- aov(maxday ~ Population+Temperature, data=spawning_group_sum)) 
+anova(max7 <- aov(maxday ~ Temperature, data=spawning_group_sum)) 
 
+AIC(max1,max2,max3,max4,max5,max6,max7)
+anova(max6) #lowest AIC, just Pop + Temp
+# Response: maxday
+#                Df  Sum Sq Mean Sq F value  Pr(>F)  
+# Population      3  417.37  139.12  2.2364 0.11708  
+# Temperature     1  416.67  416.67  6.6979 0.01804 * <--- sign. 
+# Residuals       19 1181.96   62.21             
 
-# Max release
-summary(test1 <- aov(max ~ Population*Temperature*pH, data=spawning_group_sum)) # 
-summary(test1 <- aov(max ~ Population*Temperature*pH, data=subset(spawning_group_sum, Population!="K"))) # 
-TukeyHSD(test1 <- aov(max ~ Population*Temperature*pH, data=spawning_group_sum)) # 
-aggregate(max ~ Population, data=spawning_group_sum, mean)
-aggregate(max ~ Population, data=spawning_group_sum, sd)
-
-# summary(test2 <- aov(max ~ Population*pH, data=spawning_group_sum)) # 
-# summary(test3 <- aov(max ~ Population*Temperature, data=spawning_group_sum)) #
-# summary(test4 <- aov(max ~ Population, data=spawning_group_sum)) # 
-# TukeyHSD(test4) #SN > NF, K
+# Max release magnitude 
+anova(maxmag1 <- lm(max ~ Population*Temperature*pH, data=spawning_group_sum))  
+anova(lm(max ~ Population*Temperature*pH, data=subset(spawning_group_sum, Population!="K"))) #see if pop diff. retained w/o K
+anova(maxmag2 <- lm(max ~ Population*Temperature*pH - Population:pH, data=spawning_group_sum))  
+anova(maxmag3 <- lm(max ~ Population*Temperature*pH - Population:pH - Population:Temperature:pH, data=spawning_group_sum))  
+anova(maxmag4 <- lm(max ~ Population*Temperature*pH - Population:pH - Population:Temperature:pH - Temperature, data=spawning_group_sum))  
+anova(maxmag5 <- lm(max ~ Population*Temperature*pH - Population:pH - Population:Temperature:pH - Temperature - Population:Temperature, data=spawning_group_sum))  
+anova(maxmag6 <- lm(max ~ Population + Temperature:pH, data=spawning_group_sum))  
+anova(maxmag7 <- lm(max ~ Population, data=spawning_group_sum)) #Smallest AIC
+AIC(maxmag1,maxmag2,maxmag3,maxmag4,maxmag5,maxmag6,maxmag7) 
+# Response: max
+#               Df     Sum Sq    Mean Sq F value   Pr(>F)   
+# Population    3 3.5248e+11 1.1749e+11  7.8927 0.001145 **
+# Residuals     20 2.9773e+11 1.4886e+10  
 
 # No. release days 
-summary(test1 <- aov(release.days ~ Population*Temperature*pH, data=subset(spawning_group_sum, Population!="K")))
-TukeyHSD(test1 <- aov(release.days ~ Population*Temperature*pH, data=spawning_group_sum))
-TukeyHSD(test1 <- aov(release.days ~ Population*Temperature*pH, data=subset(spawning_group_sum, Population!="K")))
+anova(lm(release.days ~ Population*Temperature*pH, data=subset(spawning_group_sum, Population!="K")))
+anova(pulses1 <- lm(release.days ~ Population*Temperature*pH, data=spawning_group_sum))
+anova(pulses2 <- lm(release.days ~ Population*Temperature*pH-Population:Temperature:pH, data=spawning_group_sum))
+anova(pulses3 <- lm(release.days ~ Population*Temperature*pH-Population:Temperature:pH-Population:pH, data=spawning_group_sum))
+anova(pulses4 <- lm(release.days ~ Population*Temperature*pH-Population:Temperature:pH-Population:pH-pH, data=spawning_group_sum))
+anova(pulses5 <- lm(release.days ~ Population*Temperature, data=spawning_group_sum)) # Lowest AIC
+anova(pulses6 <- lm(release.days ~ Population+Temperature, data=spawning_group_sum))
+AIC(pulses1,pulses2,pulses3,pulses4,pulses5,pulses6)
+
+# Response: release.days
+#                         Df Sum Sq Mean Sq F value    Pr(>F)    
+# Population              3 97.875  32.625 13.4710 0.0001209 *** <-- sign.
+# Temperature             1 24.000  24.000  9.9097 0.0062217 **  <-- sign.
+# Population:Temperature  3 17.375   5.792  2.3914 0.1067488    
+# Residuals              16 38.750   2.422                      
+# ---
+TukeyHSD(test1 <- aov(release.days ~ Population*Temperature, data=spawning_group_sum))
+TukeyHSD(test1 <- aov(release.days ~ Population*Temperature, data=subset(spawning_group_sum, Population!="K")))
 aggregate(release.days ~ Population, spawning_group_sum, sd)
 
-# summary(test2 <- aov(release.days ~ Population*pH, data=spawning_group_sum))
-# summary(test3 <- aov(release.days ~ Temperature*pH, data=spawning_group_sum))
-# summary(test4 <- aov(release.days ~ Population:Temperature:pH, data=spawning_group_sum))
-# summary(test5 <- aov(release.days ~  Population:Temperature:pH, data=spawning_group_sum))
-# summary(test6 <- aov(release.days ~ Population+Temperature, data=spawning_group_sum))
-# summary(test7 <- aov(release.days ~ Population, data=spawning_group_sum))
-# summary(test8 <- aov(release.days ~ Temperature, data=spawning_group_sum))
-# AIC(test1, test2, test3, test4, test5, test6, test7, test8) #test6
-# anova(test1, test6) #use simplest 
-# TukeyHSD(test6)
-# 
-# summary(aov(release.days ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# summary(aov(release.days ~ Population*pH, data=subset(spawning_group_sum, Temperature==10)))
-# summary(aov(maxday ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# summary(aov(maxday ~ Population*pH, data=subset(spawning_group_sum, Temperature==10)))
-# summary(aov(max ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# summary(aov(max ~ Population*pH, data=subset(spawning_group_sum, Temperature==10)))
-# summary(aov(first.big ~ Population*pH, data=subset(spawning_group_sum, Temperature==6)))
-# summary(aov(first.big ~ Population*pH, data=subset(spawning_group_sum, Temperature==10)))
-
-# What about just within 6 groups?
-summary(test1 <- aov(total.percap ~ pH, data=subset(spawning_group_sum,Temperature==6))) 
-summary(test1 <- aov(mean.percap ~pH, data=subset(spawning_group_sum,Temperature==6)))
-summary(test1 <- aov(first.big ~pH, data=subset(spawning_group_sum,Temperature==6))) 
-TukeyHSD(test1 <- aov(first.big ~pH, data=subset(spawning_group_sum,Temperature==6)))
-summary(test1 <- aov(maxday ~pH, data=subset(spawning_group_sum,Temperature==6)))
-summary(test1 <- aov(max ~pH, data=subset(spawning_group_sum,Temperature==6)))
-summary(test1 <- aov(release.days ~pH, data=subset(spawning_group_sum,Temperature==6)))
 
 
-test <- aggregate(total.percap ~ Temperature+Population+pH, data=spawning_group_sum, mean)
 
 aggregate(total.percap ~ Temperature+pH, data=test, mean)
 

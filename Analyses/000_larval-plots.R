@@ -5,7 +5,18 @@ fecundity.temp <- aggregate(Tot.Larvae ~ pH + Temperature + Date, larvae, sum, n
 #fecundity.pop <- aggregate(Tot.Larvae ~ pH + Temperature + Population + Date, subset(larvae, Temperature==6), sum, na.rm=TRUE)
 
 #Calculate cumulative larvae released through time for each pH/temp treatment (combine replicates)
-fecundity.pop <- group_by(larvae, Population, Temperature, pH) %>% dplyr::mutate(cum.total=cumsum(total.released),cum.percap = cumsum(larvae.per.broodcm),CalDay = as.numeric(format(Date,"%j"))) %>% dplyr::arrange(Date) %>% dplyr::select(Date,CalDay,pH,Temperature, Population,total.released,larvae.per.broodcm,cum.total,cum.percap) %>% mutate(Date = as.Date(Date))
+
+larvae.0 <- list()
+for (i in 1:length(Groups)) {
+  larvae.0[[i]] <- as.data.frame(group_by(subset(larvae, Group==Groups[i]), Population, Treatment, Temperature, pH) %>%  complete(Date=min(Date)-1, fill = list(Tot.Larvae=0, total.released=0, larvae.per.broodcm=0)))  
+}
+larvae.0 <- rbind(bind_rows(larvae.0), larvae)
+
+fecundity.pop <- group_by(larvae.0, Population, Temperature, pH) %>% dplyr::mutate(cum.total=cumsum(total.released),cum.percap = cumsum(larvae.per.broodcm),CalDay = as.numeric(format(Date,"%j"))) %>% dplyr::arrange(Date) %>% dplyr::select(Date,CalDay,pH,Temperature, Population,total.released,larvae.per.broodcm,cum.total,cum.percap) %>% mutate(Date = as.Date(Date))
+
+
+
+
 
 # sum and average daily stats for each pH
 density4barplots <- Bucket.Densities.wide %>%
@@ -50,7 +61,7 @@ ggplot(spawning_group_sum, aes(x=first.big-100, y=maxday-100)) +
 dev.off()
 
 
-#Try each population, color coded by treatment 
+#barplots of larval release timing, each population, color coded by treatment 
 
 pdf(file = "Results/FidalgoBay-larval-time.pdf", width = 7, height = 4.5)
 ggplot(data=subset(fecundity.pop, Population=="NF"), aes(x=CalDay-131, y=total.released, fill=Temperature:pH)) + theme_bw(base_size = 14) + 
@@ -58,7 +69,7 @@ ggplot(data=subset(fecundity.pop, Population=="NF"), aes(x=CalDay-131, y=total.r
   ylab("No. of larvae") + xlab(label=element_blank()) + 
   labs(title=("Fidalgo Bay larval release")) +
   theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = -45), colour = "gray30"), axis.title = element_blank()) +
-  scale_x_continuous(breaks = c(0,7,14,21,28,35,42,49,56)) +
+  scale_x_continuous(limits=c(min=0,max=60), breaks = c(0,7,14,21,28,35,42,49,56)) +
   scale_y_continuous(label=comma, limits=c(min=0,max=1000000), breaks=c(0, 250000, 500000, 750000, 1000000)) +
   theme(legend.position = c(0.75, 0.8), legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14), panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.title.x=element_blank(),
@@ -73,7 +84,7 @@ ggplot(data=subset(fecundity.pop, Population=="HL"), aes(x=CalDay-131, y=total.r
   ylab("No. of larvae") + xlab(label=element_blank()) + 
   labs(title=("Dabob Bay larval release")) +
   theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = -45), colour = "gray30"), axis.title = element_blank()) +
-  scale_x_continuous(breaks = c(0,7,14,21,28,35,42,49,56)) +
+  scale_x_continuous(limits=c(min=0,max=60), breaks = c(0,7,14,21,28,35,42,49,56)) +
   scale_y_continuous(label=comma, limits=c(min=0,max=1000000), breaks=c(0, 250000, 500000, 750000, 1000000)) +
   theme(legend.position = "none", legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14), panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.title.x=element_blank(),
@@ -87,7 +98,7 @@ ggplot(data=subset(fecundity.pop, Population=="SN"), aes(x=CalDay-131, y=total.r
   ylab("No. of larvae") + xlab(label=element_blank()) + 
   labs(title=("Oyster Bay cohort 1 larval release")) +
   theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = -45), colour = "gray30"), axis.title = element_blank()) +
-  scale_x_continuous(breaks = c(0,7,14,21,28,35,42,49,56)) +
+  scale_x_continuous(limits=c(min=0,max=60), breaks = c(0,7,14,21,28,35,42,49,56)) +
   scale_y_continuous(label=comma, limits=c(min=0,max=1000000), breaks=c(0, 250000, 500000, 750000, 1000000)) +
   theme(legend.position =  "none", legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14), panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.title.x=element_blank(),
@@ -102,12 +113,84 @@ ggplot(data=subset(fecundity.pop, Population=="K"), aes(x=CalDay-131, y=total.re
   labs(title=("Oyster Bay cohort 2 larval release")) +
   theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = -45), colour = "gray30"), 
         axis.title.y = element_blank(), axis.title.x = element_text(colour="gray30"), axis.text.x = element_text(size=14), axis.text.y = element_text(size=14)) +
-  scale_x_continuous(breaks = c(0,7,14,21,28,35,42,49,56)) +
+  scale_x_continuous(limits=c(min=0,max=60), breaks = c(0,7,14,21,28,35,42,49,56)) +
   scale_y_continuous(label=comma, limits=c(min=0,max=1000000), breaks=c(0, 250000, 500000, 750000, 1000000)) +
   theme(legend.position =  "none", legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14), panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.text.y = element_text(size=14)) +
   scale_fill_manual(name="Temperature/pCO2",values=c('#67a9cf', '#2166ac', '#ef8a62', '#b2182b'), label=c("6°C/Amb", "6°C/High", "10°C/Amb", "10°C/High"))
 dev.off()
+
+
+# All populations combined 
+pdf(file = "Results/All-pops-larval-time.pdf", width = 7, height = 4.5)
+ggplot() + theme_bw(base_size = 14) + 
+  geom_bar(data=fecundity.pop, aes(x=CalDay-131, y=total.released, fill=Temperature:pH), stat="identity",width=1, col="gray60") + 
+  ylab("No. of larvae") + xlab(label="Days after larval release onset") +
+  labs(title=("Larval release, all cohorts")) +
+  theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = 0), colour = "gray30"), 
+        axis.title.y = element_blank(), axis.title.x = element_text(colour="gray30"), axis.text.x = element_text(size=14), axis.text.y = element_text(size=14)) +
+  scale_x_continuous(limits=c(min=0,max=60), breaks = c(0,7,14,21,28,35,42,49,56)) +
+  scale_y_continuous(label=comma, limits=c(min=0,max=1700000), breaks=c(0, 500000, 1000000, 1500000)) +
+  theme(legend.position = c(0.8, 0.8), legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14),  panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.text.y = element_text(size=14)) +
+  scale_fill_manual(name="Temperature/pCO2",values=c('#67a9cf', '#2166ac', '#ef8a62', '#b2182b'), label=c("6°C/Amb", "6°C/High", "10°C/Amb", "10°C/High")) 
+dev.off()
+
+
+#  Cumulative fecundity line plots 
+
+# line plots 
+
+plot_list = list()
+for (i in 1:4) {
+  p <- ggplot() +
+    geom_line(data=subset(fecundity.pop, Population == plot.cohort[i]), aes(x=CalDay-101, y=cum.percap, group=Temperature:pH, color=Temperature:pH), size=1.6) + theme_bw(base_size = 10) + ylab("No. of larvae") + xlab(label="Days in reproductive conditioning") + 
+    labs(title=(plot.names[i])) +
+    theme(plot.title = element_text(size = 13, margin = margin(t = 30, b = 0), colour = "gray30"), 
+          axis.title.y = element_blank(), axis.title.x = element_text(colour="gray30"), axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) +
+    scale_x_continuous(limits=c(min=0,max=90), breaks = c(0,14,28,42,56,70,86)) +
+    scale_y_continuous(label=comma, breaks=scales::pretty_breaks(n = 5)) +
+    theme(legend.position = "none", legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14),  panel.grid.minor = element_blank(), 
+          panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.text.y = element_text(size=10)) +
+    scale_color_manual(name="Temperature/pCO2",values=c('#67a9cf', '#2166ac', '#ef8a62', '#b2182b'), label=c("6°C/Amb", "6°C/High", "10°C/Amb", "10°C/High")) + geom_point(data=subset(fecundity.pop, Population == plot.cohort[i]), aes(x=CalDay-101, y=cum.percap, group=Temperature:pH, fill=Temperature:pH), shape=21, size=2, stroke=.2) + scale_fill_manual(values=c("#d1e5f0","#67a9cf","#fddbc7","#ef8a62"))
+  plot_list[[i]] <- p
+}
+
+# Save plots to pdf. Makes a separate file for each plot.
+for (i in 1:4) {
+  file_name = paste("Results/cumulative_larvae_", i, ".pdf", sep="")
+  pdf(file_name, width = 6, height = 3)
+  print(plot_list[[i]])
+  dev.off()
+}
+
+
+
+# step plots 
+for (i in 1:4) {
+  print(ggplot() +
+          geom_step(data=subset(fecundity.pop, Population == plot.cohort[i]), aes(x=CalDay-101, y=cum.percap, group=Temperature:pH, color=Temperature:pH), size=1) + geom_point(data=subset(fecundity.pop, cum.percap>0 & Population == plot.cohort[i]), aes(x=CalDay-101, y=cum.percap, group=Temperature:pH, color=Temperature:pH), size=1) + theme_bw(base_size = 14) + ylab("No. of larvae") + xlab(label="Days in reproductive conditioning") + 
+          labs(title=(plot.names[i])) +
+          theme(plot.title = element_text(size = 16, margin = margin(t = 30, b = -30), colour = "gray30"), 
+                axis.title.y = element_blank(), axis.title.x = element_text(colour="gray30"), axis.text.x = element_text(size=14), axis.text.y = element_text(size=14)) +
+          scale_x_continuous(limits=c(min=0,max=90), breaks = c(0,14,28,42,56,70,86)) +
+          #scale_y_continuous(label=comma, limits=c(min=0,max=4000000), breaks=c(0, 1000000, 2000000, 3000000, 4000000)) +
+          theme(legend.position = "none", legend.text = element_text(colour="gray30", size=14), legend.title = element_text(colour="gray30", size=14),  panel.grid.minor = element_blank(), 
+                panel.grid.major.x = element_blank(), panel.border = element_blank(), axis.text.y = element_text(size=14)) +
+          scale_color_manual(name="Temperature/pCO2",values=c('#67a9cf', '#2166ac', '#ef8a62', '#b2182b'), label=c("6°C/Amb", "6°C/High", "10°C/Amb", "10°C/High")))
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1043,12 +1126,14 @@ dev.off()
 
 
 
+
+
 # Stacked barplots, color coded by temperature and two separate ones by pH 
 
 # Ambient pH by temperature
 pdf(file = "Results/ambpH-larval-time-temp.pdf", width = 7, height = 4)
 ggplot(data=subset(fecundity.pop, pH=="Ambient"), aes(x=Date, y=total.released, fill=Temperature)) + 
-  geom_bar(stat="identity",width=1, col="gray60", position = position_dodge(width=2)) + 
+  geom_bar(stat="identity",width=0.5, col="gray60") + 
   ylab("No. of larvae") + xlab(label=element_blank()) + ggtitle("Ambient pH larval release") + theme_bw(base_size = 12) + 
   theme(plot.title = element_text(face = 'bold',size = 14, hjust = 0, vjust = -.7, colour = "gray30"), 
         axis.title = element_blank()) +

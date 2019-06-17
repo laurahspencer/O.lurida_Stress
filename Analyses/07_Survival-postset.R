@@ -20,10 +20,10 @@ plot(Survival.post$Population, 100*(Survival.post$survival.postset), main="Perce
      size=I(4), xlab="Population", ylab="Percent Survival", col=Survival.post$Population, cex.lab=1.3, cex.main=1.5, cex.axis=1.3)
 
 # Inspect correlation plots between % survival to setting size (224um), total spawned, # days stocked, # larvae stocked. NOTE: expand plot window 
-pairs(Survival.post[!rowSums(is.na(
-  Survival.post[c("Total.Spawned", "Days.Stocked", "Larvae.Stocked", "Larvae.stocked.adjusted", "Mean.stocked", "Setters.stocked", "survival.setters", "survival.postset")])),
-  c("Total.Spawned", "Days.Stocked", "Larvae.Stocked", "Larvae.stocked.adjusted",  "Mean.stocked", "Setters.stocked", "survival.setters", "survival.postset")], lower.panel=panel.smooth, upper.panel=panel.cor)
-# RESULT: No significant correlation between % survival & other variables. Other variables highly correlated. Include Total.Spawned variable in models. 
+  pairs(Survival.post[!rowSums(is.na(
+  Survival.post[c("Larvae.stocked.adjusted", "Mean.stocked", "Setters.stocked", "survival.setters", "survival.postset")])),
+  c("Larvae.stocked.adjusted",  "Mean.stocked", "Setters.stocked", "survival.setters", "survival.postset")], lower.panel=panel.smooth, upper.panel=panel.cor)
+# RESULT: Survival to post set not correlated with # setters stocked, but highly correlated with larval tank density - also high correlation among larval tank metrics; include Larvae.stocked.adjusted in model
 
 # Test assumptions prior to running anova/lm: 
 
@@ -46,58 +46,46 @@ bartlett.test(log(survival.postset)~pH, data=Survival.post) #0.05279 <--- hmmm. 
 
 # Test percent survival data against factors via summary(lm()). Do not apply weight based on # larvae reared. Drop variables sequentially with highest p-value. 
 
-# First test variables separately. None significant on their own 
-summary(test.postset1 <- aov(log(survival.postset) ~ Population, data=Survival.post)) # Sign.
-summary(test.postset1 <- aov(log(survival.postset) ~ Population, data=subset(Survival.post, Population!="SN"))) # not
-summary(test.postset2 <- aov(log(survival.postset) ~ Temperature, data=Survival.post))
-summary(test.postset3 <- aov(log(survival.postset) ~ pH, data=Survival.post))
-anova(test.postset4 <- aov(log(survival.postset) ~ Mean.stocked + Population, data=Survival.post)) #highly sign! 
-anova(test.postset4 <- aov(log(survival.setters) ~ Mean.stocked + Population, data=Survival.post)) #not! 
-plot(test.postset4$residuals)
+# First test variables separately. 
+anova(test.postset0 <- lm(log(survival.postset) ~ Larvae.stocked.adjusted, data=Survival.post)) # Sign., add as random effect 
+anova(test.postset1 <- lm(log(survival.postset) ~ Population + (1|Larvae.stocked.adjusted), data=Survival.post)) # Sign.
+TukeyHSD(aov(test.postset1 <- lm(log(survival.postset) ~ Population + (1|Larvae.stocked.adjusted), data=Survival.post))) # Sign.
+anova(lm(log(survival.postset) ~ Population + (1|Larvae.stocked.adjusted), data=subset(Survival.post, Population!="SN"))) # not
+anova(test.postset2 <- lm(log(survival.postset) ~ Temperature + (1|Larvae.stocked.adjusted), data=Survival.post))
+anova(test.postset3 <- lm(log(survival.postset) ~ pH + (1|Larvae.stocked.adjusted), data=Survival.post))
+anova(test.postset4 <- lm(log(survival.postset) ~ Population + Temperature*pH + (1|Larvae.stocked.adjusted), data=Survival.post)) 
+anova(test.postset5 <- lm(log(survival.postset) ~ Population*Temperature+pH + (1|Larvae.stocked.adjusted), data=Survival.post)) 
+anova(test.postset6 <- lm(log(survival.postset) ~ Population*pH+Temperature + (1|Larvae.stocked.adjusted), data=Survival.post))  #smallest AIC
+anova(test.postset7 <- lm(log(survival.postset) ~ Population*pH + (1|Larvae.stocked.adjusted), data=Survival.post)) 
+anova(test.postset8 <- lm(log(survival.postset) ~ Population + Population:pH + (1|Larvae.stocked.adjusted), data=Survival.post)) 
+anova(test.postset9 <- lm(log(survival.postset) ~ Population:pH + (1|Larvae.stocked.adjusted), data=Survival.post)) 
 
-# include larval stocking density as random effect 
-summary(test.postset1 <- aov(log(survival.postset) ~ Population + (1|Mean.stocked), data=Survival.post)) # Sign.
-summary(test.postset1 <- aov(log(survival.setters) ~ Population + (1|Mean.stocked), data=Survival.post)) # Sign.plot(test.postset1$residuals)
+AIC(test.postset1, test.postset2, test.postset3, test.postset4, test.postset5, test.postset6, test.postset7, test.postset8, test.postset9) 
+summary(test.postset6) # Model p-value=0.007055, Adjusted R-squared=0.7819 
 
-# Now test variables together, using drop1 
-drop1(test.postset6 <- aov(log(survival.postset) ~ Mean.stocked + Population + Temperature + pH, data=Survival.post)) 
-drop1(test.postset7 <- aov(log(survival.postset) ~ Mean.stocked + Population + Temperature, data=Survival.post)) 
-drop1(test.postset8 <- aov(log(survival.postset) ~ Mean.stocked + Population, data=Survival.post)) 
-drop1(test.postset9 <- aov(log(survival.postset) ~ Mean.stocked*pH + Mean.stocked*Population + Mean.stocked*Temperature, data=Survival.post))
-drop1(test.postset10 <- aov(log(survival.postset) ~ Mean.stocked*pH + Mean.stocked*Temperature, data=Survival.post)) 
-drop1(test.postset11 <- aov(log(survival.postset) ~ Mean.stocked*pH, data=Survival.post)) 
-drop1(test.postset12 <- aov(log(survival.postset) ~ pH*Mean.stocked + pH*Population + pH*Temperature, data=Survival.post)) 
-drop1(test.postset13 <- aov(log(survival.postset) ~ pH*Mean.stocked + pH*Population, data=Survival.post)) 
-drop1(test.postset14 <- aov(log(survival.postset) ~ Population:Mean.stocked + Population:pH + Population:Temperature, data=Survival.post)) 
-drop1(test.postset15 <- aov(log(survival.postset) ~ Population:Mean.stocked + Population:Temperature, data=Survival.post)) 
-drop1(test.postset16 <- aov(log(survival.postset) ~ Population:Mean.stocked, data=Survival.post)) 
-drop1(test.postset17 <- aov(log(survival.postset) ~ Temperature:Mean.stocked + Temperature:pH + Temperature:Population, data=Survival.post)) 
-drop1(test.postset18 <- aov(log(survival.postset) ~ Temperature:Mean.stocked + Temperature:Population, data=Survival.post)) 
-drop1(test.postset19 <- aov(log(survival.postset) ~ Temperature:Mean.stocked, data=Survival.post)) 
-
-AIC(test.postset1, test.postset2, test.postset3, test.postset4, test.postset5, test.postset6, test.postset7, test.postset8, test.postset9, test.postset10, test.postset11, test.postset12, test.postset13, test.postset14, test.postset15, test.postset16, test.postset17, test.postset18, test.postset19) 
-
-summary(test.postset14) # Model p-value=0.0277, Adjusted R-squared=0.908 AIC=16.47057 (smallest AIC)
-TukeyHSD(test.postset14)
 # Predictor               Df SumSq  MeanSq  F-value Pr(>F)  
-#Population:Mean.stocked  4 19.8830  4.9707 32.7224 0.008272 **
-#Population:pH            4  3.5419  0.8855  5.8290 0.089644 . 
-#Population:Temperature   4  0.8867  0.2217  1.4592 0.393778   
-#Residuals                3  0.4557  0.1519                   
+# Population              3 15.8643  5.2881 14.6812 0.002102 **
+#   pH                    1  0.0012  0.0012  0.0034 0.955229   
+# Temperature             1  1.3681  1.3681  3.7982 0.092317 . 
+# Population:pH           3  5.0122  1.6707  4.6384 0.043394 * 
+#   Residuals             7  2.5214  0.3602    
 
-## RESULT: Best fit model includes pH interaction with Mean larvae stocked in culture tanks, Population and Temperature. Only highly significant covariate is Mean.stocked, Population:pH covariate trends as sign.  This indicates that the primary factor was tank density from new->eyed larvae. This is interesting, as density did not affect survival to 224um, indicating that there may have been density-dependent stress or competition for resources, that only manifested during the metamorphosis phase. 
+TukeyHSD(aov(test.postset6 <- lm(log(survival.postset) ~ Population*pH+Temperature + (1|Larvae.stocked.adjusted), data=Survival.post))) #pairwise 
 
-# Mean stocking density vary by temp & pH treatment? 
-shapiro.test(Survival.post$Mean.stocked) #normal OK
-hist(Survival.post$Mean.stocked) #normal OK
-bartlett.test(Survival.post$Mean.stocked ~ Survival.post$pH) #variance OK
-bartlett.test(Survival.post$Mean.stocked ~ Survival.post$Temperature) #variance OK
-anova(lm(Mean.stocked ~ Temperature*pH, data=Survival.post)) #no sign. 
+
+## RESULT: Best fit model includes significant Population effect, Population:pH interaction, larvae stocked in culture tanks, Population and Temperature. Population highly sign., Population:pH covariate sign.
+
+# larvae stocked vary by temp & pH treatment? 
+shapiro.test(Survival.post$Larvae.stocked.adjusted) #normal OK
+hist(Survival.post$Larvae.stocked.adjusted) #normal OK
+bartlett.test(Survival.post$Larvae.stocked.adjusted ~ Survival.post$pH) #variance OK
+bartlett.test(Survival.post$Larvae.stocked.adjusted ~ Survival.post$Temperature) #variance OK
+anova(lm(Larvae.stocked.adjusted ~ Temperature*pH, data=Survival.post)) #no sign. 
 
 # survival postset ~ stocking density during larval phase 
-plot(x=Survival.post$Mean.stocked, y=log(Survival.post$survival.postset), bg="black", col=c("gray32", "steelblue3")[as.numeric(Survival.post$pH)], pch=c(16,17)[as.numeric(Survival.post$Temperature)], cex=2, main="Log(%) survival through metamorphosis ~\nmean larval tank density", xlab="mean larval tank density", ylab="log(%) survival")
+plot(x=Survival.post$Larvae.stocked.adjusted, y=log(Survival.post$survival.postset), bg="black", col=c("gray32", "steelblue3")[as.numeric(Survival.post$pH)], pch=c(16,17)[as.numeric(Survival.post$Temperature)], cex=2, main="Log(%) survival through metamorphosis ~\n# days larvae stocked", xlab="mean larval tank density", ylab="log(%) survival")
 #abline(test.postsety) 
-text(x=Survival.post$Mean.stocke+2000,
+text(x=Survival.post$Larvae.stocked.adjusted+2000,
      y=log(Survival.post$survival.postset)-.1, col="gray30", labels=Survival.post$Population, xpd=T, cex=0.8)
 legend(70000, 3, legend=c("6-Low", "10-Low", "6-Amb", "10-Amb"),
        col=c("steelblue3", "steelblue3", "gray32", "gray32"), pch=c(16, 17, 16, 17), cex=1)

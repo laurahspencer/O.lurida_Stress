@@ -124,6 +124,7 @@ aggregate(survival ~ Temperature+pH, data=Bucket.Densities.wide, sd)
 
 View(Bucket.Densities.wide)
 plot(x=Bucket.Densities.wide$Population, y=Bucket.Densities.wide$survival.t)
+
 # ------- Compare % larval survival between biweekly screenings, using # larvae stocked (included new larvae added), and # larvae counted. Remember: 224um larvae were counted, but then removed from the larval buckets. 
 
 # Boxplot of % survival between screenings by treatment - trend? No obvious diff. 
@@ -155,12 +156,12 @@ Bucket.Densities.wide$survival.t <- asin(sqrt(Bucket.Densities.wide$survival)) #
 survival.biweekly <- subset(Bucket.Densities.wide, (survival.t!= "NA" & survival.t!="NaN")) 
 
 # Compare % survival (sqrt-asin transformed) between chilled/unchiled (temperature) and pH treatment groups 
-anova(biweekly.lm <- aov(survival.t ~ pH, data=survival.biweekly)) #population dff
+anova(biweekly.lm <- aov(survival.t ~ Population*Temperature*pH, data=survival.biweekly)) #population dff only 
 TukeyHSD(biweekly.lm <- aov(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) #population dff
+anova(biweekly.lm <- aov(survival.t ~ Population, data=survival.biweekly)) #population dff only 
 
 aggregate(survival ~ Temperature+pH, data=survival.biweekly, mean)
 aggregate(survival ~ Temperature+pH, data=survival.biweekly, sd)
-View(survival.biweekly)
 
 
 plot(biweekly.lm$residuals) #look good 
@@ -169,14 +170,23 @@ aggregate(survival ~ Population, data=survival.biweekly, mean)
 aggregate(survival ~ Population, data=survival.biweekly, sd)
 
 anova(lm(survival.t ~ Population, data=survival.biweekly)) 
-anova(lm(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) 
-summary(lm(survival.t ~ Population, data=survival.biweekly)) #no diff 
+anova(lm(survival.t ~ Population, data=subset(survival.biweekly, Population!="SN"))) #no diff w/o SN
+summary(lm(survival.t ~ Population, data=survival.biweekly)) 
 
 summary(lm(survival.t ~ expected, data=survival.biweekly)) # Include stocking density (aka "expected", for the # larvae put into bucket). yes diff, but how? the scatter plot above doesn't indicate +/- stocking influence ... 
 
-summary(lm(survival.t ~ expected*Temperature*pH, data=survival.biweekly)) # include all 3 factors 
-summary(lm(survival.t ~ expected*Temperature, data=survival.biweekly)) # just temp & # larvae put in bucket 
-anova(lm(survival.t ~ Temperature*pH*expected, data=survival.biweekly)) # re-order to assess F-values 
+anova(biweekly.lm0 <- lm(survival.t ~ expected, data=survival.biweekly)) 
+anova(biweekly.lm1 <- lm(survival.t ~ Population + (1|expected), data=survival.biweekly)) 
+anova(biweekly.lm2 <- lm(survival.t ~ Temperature + (1|expected), data=survival.biweekly)) 
+anova(biweekly.lm3 <- lm(survival.t ~ pH + (1|expected), data=survival.biweekly)) 
+anova(biweekly.lm4 <- lm(survival.t ~ Population*Temperature*pH + (1|expected), data=survival.biweekly)) # include all factors 
+anova(biweekly.lm5 <- lm(survival.t ~ Population*Temperature + (1|expected), data=survival.biweekly)) # 
+
+AIC(biweekly.lm1, biweekly.lm2, biweekly.lm3, biweekly.lm4, biweekly.lm5) #lowest AIC = lm1
+summary(biweekly.lm1) #p-value = 0.02389, R-squared very low (0.028)
+plot(biweekly.lm1$residuals, main="studentized residuals\n%survival biweekly counts model") # inspect residuals. look good.
+TukeyHSD(aov(biweekly.lm1 <- lm(survival.t ~ Population + (1|expected), data=survival.biweekly)))
+
 
 # test 6 and 10 groups separately 
 anova(lm(survival.t ~ pH, data=subset(survival.biweekly, Temperature == 6))) #no diff

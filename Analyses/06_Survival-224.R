@@ -39,10 +39,10 @@ plot(Survival$Total.Spawned, 100*(Survival$survival.setters), main="Percent Surv
     xlab="Total Spawned", ylab="Percent Survival", col=Survival$pH, cex.lab=1.3, cex.main=1.5, cex.axis=1.3)
 
 # Inspect correlation plots between % survival to setting size (224um), total spawned, # days stocked, # larvae stocked. NOTE: expand plot window 
-pairs(Survival[!rowSums(is.na(
-  Survival[c("Total.Spawned", "Days.Stocked", "Larvae.Stocked", "Larvae.stocked.adjusted", "survival.setters")])),
-  c("Total.Spawned", "Days.Stocked",  "Larvae.Stocked", "Larvae.stocked.adjusted", "survival.setters")], lower.panel=panel.smooth, upper.panel=panel.cor)
-# RESULT: No significant correlation between % survival & other variables. Other variables highly correlated. Include Total.Spawned variable in models. 
+pairs(Survival.set[!rowSums(is.na(
+  Survival.set[c("Larvae.stocked.adjusted", "density", "survival.setters")])),
+  c("Larvae.stocked.adjusted", "density", "survival.setters")], lower.panel=panel.smooth, upper.panel=panel.cor)
+# RESULT: No significant correlation between % survival & other variables. Other variables highly correlated.
 
 # Test assumptions prior to running anova/lm: 
 
@@ -66,49 +66,31 @@ bartlett.test(survival.setters~pH, data=Survival.set) #0.8795
 # Test percent survival data against factors via summary(lm()). Do not apply weight based on # larvae reared. Drop variables sequentially with highest p-value. 
 
 # First test variables separately. None significant on their own 
-plot(Survival.post$survival.setters ~ Survival.post$Mean.stocked, col=Survival.post$Population)
-summary(test.setters0 <- lm(survival.setters ~ Mean.stocked, data=Survival.post))
-anova(test.setters1 <- lm(survival.setters ~ Population, data=Survival.post))
-TukeyHSD(test.setters1 <- aov(survival.setters ~ Population, data=Survival.post))
-anova(test.setters1 <- lm(survival.setters ~ Population, data=subset(Survival.post, Population!="SN")))
-summary(test.setters2 <- lm(survival.setters ~ Temperature, data=Survival.post))
-summary(test.setters3 <- lm(survival.setters ~ factor(pH), data=Survival.post))
-
-plot(x=Survival.post$Population, y=Survival.post$survival.setters)
-plot(x=Survival.post$Population, y=Survival.post$survival.postset)
-
+anova(test.setters0 <- lm(survival.setters ~ density, data=Survival.set)) 
+anova(test.setters1 <- lm(survival.setters ~ Temperature, data=Survival.set)) 
+anova(test.setters2 <- lm(survival.setters ~ pH, data=Survival.set)) 
+anova(test.setters3 <- lm(survival.setters ~ Population, data=Survival.set))
 # Now test variables together, using drop1 
-summary(test.setters4 <- lm(survival.setters ~ Population + Temperature + pH + Population:Temperature + Population:pH + Temperature:pH, data=Survival.set)) 
-summary(test.setters5 <- lm(survival.setters ~ Population + Temperature + pH + Population:Temperature + Population:pH, data=Survival.set)) 
-summary(test.setters6 <- lm(survival.setters ~ Population + Temperature + pH + Population:Temperature, data=Survival.set)) #best p-value for whole model (0.06885)
-summary(test.setters7 <- lm(survival.setters ~ Population + Temperature + pH, data=Survival.set)) 
-summary(test.setters8 <- lm(survival.setters ~ Temperature + pH, data=Survival.set)) 
-summary(test.setters9 <- lm(survival.setters ~ Temperature*pH, data=Survival.set))
-summary(test.setters10 <- lm(survival.setters ~ Population*pH, data=Survival.set))
-summary(test.setters11 <- lm(survival.setters ~ Population*Temperature, data=Survival.set))
-summary(test.setters12 <- lm(survival.setters ~ Population + Temperature + pH + Population:pH, data=Survival.set))
-summary(test.setters13 <- lm(survival.setters ~ Population + Temperature + pH + Temperature:pH, data=Survival.set))
+anova(test.setters4 <- lm(survival.setters ~ Population+Temperature+pH, data=Survival.set)) 
+anova(test.setters5 <- lm(survival.setters ~ Population*pH+Temperature, data=Survival.set)) 
+anova(test.setters6 <- lm(survival.setters ~ Population+Temperature*pH, data=Survival.set)) 
+anova(test.setters7 <- lm(survival.setters ~ Population*Temperature+pH, data=Survival.set)) 
+anova(test.setters8 <- lm(survival.setters ~ Temperature+pH+Population:Temperature, data=Survival.set)) # most parsimonious
+anova(test.setters9 <- lm(survival.setters ~ Temperature+pH, data=Survival.set)) 
 
-AIC(test.setters1, test.setters2, test.setters3, test.setters4, test.setters5, test.setters6, test.setters7, test.setters8, test.setters9, test.setters10, test.setters11, test.setters12, test.setters13) 
+AIC(test.setters0, test.setters1, test.setters2, test.setters3, test.setters4, test.setters5, test.setters6, test.setters7, test.setters8, test.setters9) 
+summary(test.setters8) # Model p-value=0.06885, Adjusted R-squared=0.5459 
 
-summary(test.setters5) # Model p-value=0.2026, Adjusted R-squared=0.5127 AIC=65.31575
-summary(test.setters6) # Model p-value=0.06885, Adjusted R-squared=0.5459 AIC=67.13980
-summary(test.setters3) # Model p-value=0.1498, Adjusted R-squared=0.08104 AIC=-71
+anova(test.setters8) 
+# Predictor                  Df SumSq  MeanSq  F-value Pr(>F)  
+# Temperature             1 10.087 10.0872  3.9599 0.08690 .
+# pH                      1 11.974 11.9744  4.7008 0.06680 .
+# Temperature:Population  6 44.252  7.3753  2.8953 0.09518 .
+# Residuals               7 17.831  2.5473                  
 
-anova(test.setters6) # 1 fewer covariates, best R-squared and total p-value. Most parsimonious.  
-# Predictor               Df SumSq  MeanSq  F-value Pr(>F)  
-# Population              3 21.945  7.3149  2.8716 0.1131  
-# Temperature             1 10.087 10.0872  3.9599 0.0869 .
-# pH                      1 11.974 11.9744  4.7008 0.0668 .
-# Population:Temperature  3 22.307  7.4358  2.9191 0.1099  
-# Residuals               7 17.831  2.5473                 
+plot(test.setters8$residuals, main="studentized residuals\n%survival to eyed larvae model") # inspect residuals. look good.s 
 
-# Temp10 covariate: 0.9904
-# pH-low covariate: -1.7302
-
-plot(case(test.setters6)[,"stu.res"], main="studentized residuals\n%survival to eyed larvae model") # inspect residuals. look good.s 
-
-## RESULT, all data: Best fit/most parsimonious model includes Population, Temperature, pH and Population:Temperature covariates. The pH and Temperature covariates trend as significantly different from zero (p=0.0869 and 0.0668, resp.), but not highly significant. 
+## RESULT, all data: Best fit/most parsimonious model includes Total.Spawned, Temperature, Total.Spawned:Temperature, and Total.Spawned:pH covariates. Temperature is retained, but not sign. pH is not retained. 
 
 aggregate(survival.setters ~ pH, Survival.set, mean) #mean survival between pH
 aggregate(survival.setters ~ pH, Survival.set, var) #mean var between pH
