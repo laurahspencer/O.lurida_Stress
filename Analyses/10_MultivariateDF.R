@@ -1,9 +1,7 @@
 # create master summary statistic df (for multivariate analysis)
 
-View(Oly.size.summary3)
-
 # Copy dataframes so I don't mess up the other ones 
-Oly.size.summary3.c <- Oly.size.summary3
+#Oly.size.summary3.c <- Oly.size.summary3
 Survival.post.c <- Survival.post
 Deploy.data.c <- Deploy.data
 Deploy.growth.c <- Deploy.growth
