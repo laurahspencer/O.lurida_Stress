@@ -1,0 +1,58 @@
+TO DO 
+
+LAB - Monday, Tuesday, Wednesday, Friday 
+- Library amplification at pre-determined cycle number - DONE
+- Purification - DONE
+- Qubit HS DNA test, then DNA nano chip  - DONE
+- Do all above for 1 batch of samples, assess. DONE  
+- Reach out to sequencing cores for timeline / bid on sequencing - DONE  
+- PROCESS MORE BATCHES OF SAMPLES: 5 more batches, 2 very large, 1 small, 3 very small - DONE
+- REDO samples 
+
+POLYDORA 
+- Salinity check on Monday - DONE
+- Chemical innoculation, Monday or Tuesday - DONE 
+- Take my oyster shells - DONE 
+- Monitor nitrogen levels all week - DONE 
+- Coordinate oyster shells - ??? 
+
+GENERAL EXAM 
+- Meet with Steven re: what to expect - DONE. FOCUS ON MY PAPERS. 
+- Presentation for exam, like an update. 
+- Review all my notes 
+- Read my Qualifying Exam 
+- Read more genomics 
+- Re-read my intros, discussion. Read papers I cite, plus others. 
+- Prep for main concepts from my papers 
+
+OLY EPIGENETICS 
+* New methylation distance matrix to include just loci with new 75% threshold 
+* Re-do MACAU 
+* Reannontate MACAU
+* Reannonate DMLs 
+* DMG analysis based on Hollie's workflow 
+* Figure out something comparable to Fst on DMLs and MACAU to do a correlation analysis 
+* GO_MWU analysis redo with genes: https://github.com/sr320/paper-oly-mbdbs-gen/blob/master/code/GO_MWU.ipynb
+* Get manhattan distance for just DMLs 
+* Get methods down on paper ASAP  
+- Presentation for AA2020 
+
+REPRODUCTION OA REVIEW 
+- Fertilization data - recollect 
+- Re-analyze, draft figure   
+- Comments on Yaamini's section - started 
+- Address Yaamini's comments - 
+- Sketch mechanisms figure 
+- Sketch Community Scene / Impacts figure 
+
+OLY TEMP/FOOD paper 
+- Hannah finish larvae - week of 1/6 - DONE! 
+- Me finish measuring - week of 1/6 
+- Update Results and Discussion where needed  
+
+OTHER 
+- DECIDE on GIS class or not - NOT 
+- INTERN application - DONE 
+- Public announcement for Oly carryover paper - DONE 
+- DERM APPOINTMENT 
+
